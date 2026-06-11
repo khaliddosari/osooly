@@ -21,14 +21,16 @@
 dashboard of user-composed cards over a unified asset ledger, with LangGraph agents
 recommending actions per asset class.
 
-- **Stage:** v1 spec written; implementation pending. Repo is currently spec-only +
-  the embedded Liquid Glass design system + the Namtheg AutoML project (sibling, being
-  ported in — see §3.7 of the PRD).
+- **Stage:** v1 implementation in progress — S1 (scaffolding + visual shell) shipped:
+  Next.js 15 + TypeScript + Tailwind with the Liquid Glass tokens, header/footer shell,
+  ambient glow, and the empty-state dashboard. S2+ (auth, D1, cards, agents) pending —
+  see [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
 - **Repo layout (current):**
   - `Docs/PRD.md` — the source of truth (this file's parent doc)
   - `Docs/Liquid Glass-Portfolio Design System/` — visual source of truth
-  - `Docs/PRD-plan.md` — historical planning doc, kept for context
-  - `Namtheg/AutoML/` — the sibling project being ported into Osooly
+  - `Docs/IMPLEMENTATION-STAGES.md` — the 10-stage v1 slicing plan
+  - `app/`, `components/`, `lib/`, `public/` — the Next.js app (S1 visual shell)
+  - `Namtheg/AutoML/` — the sibling project being ported into Osooly (read-only)
 - **Canonical version of this block:** [PRD §3.1 Product overview](Docs/PRD.md#31-product-overview)
 
 ---

@@ -104,5 +104,18 @@ diverge.
   PRD; that's enough.
 - **No restated design rules.** They live in the Liquid Glass README. Linking is
   better than mirroring — mirrors drift.
-- **No CI/test instructions yet.** v1 code doesn't exist; this file will grow a
-  "Running / testing" section the first time we ship runnable code.
+- **No CI/test instructions yet** beyond the "Running locally" section below — tests
+  arrive with the layout solver in S3.
+
+---
+
+## Running locally
+
+```
+npm install
+npm run dev      # http://localhost:3000 → redirects to /dashboard
+npm run build    # production build (must stay clean before any commit)
+```
+
+No env vars are needed yet (auth + D1 land in S2; `.dev.vars.example` will document
+them then).

@@ -1,0 +1,316 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   LIQUID GLASS — material layer for Osooly
+   Dark, frosted "liquid glass" surfaces floating over an ambient cyan/blue/violet
+   glow. Tokens mirror the Khalid Al Dosari portfolio design system; lifted from
+   the Namtheg Frontend reference implementation.
+   ========================================================================== */
+
+/* Thmanyah Serif Display — signature display serif (Arabic name + brand moments) */
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("/fonts/thmanyahserifdisplay-Light.otf") format("opentype");
+  font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("/fonts/thmanyahserifdisplay-Regular.otf") format("opentype");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("/fonts/thmanyahserifdisplay-Medium.otf") format("opentype");
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("/fonts/thmanyahserifdisplay-Bold.otf") format("opentype");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("/fonts/thmanyahserifdisplay-Black.otf") format("opentype");
+  font-weight: 900; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* Core */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #111118;
+  --text-primary: #e8e8ed;
+  --text-secondary: #9999a8;
+
+  /* Accent (cyan → blue) */
+  --accent: #4fc3f7;
+  --accent-dark: #0288d1;
+  --accent-gradient: linear-gradient(135deg, #4fc3f7, #0288d1);
+  --border: rgba(255, 255, 255, 0.08);
+
+  /* Ambient glow hues — the light the glass refracts */
+  --glow-cyan: rgba(79, 195, 247, 0.18);
+  --glow-blue: rgba(2, 136, 209, 0.15);
+  --glow-violet: rgba(126, 87, 194, 0.14);
+
+  /* Liquid-glass material */
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  --glass-bg-hover: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+  --glass-blur: blur(24px) saturate(180%);
+  --glass-blur-strong: blur(32px) saturate(200%);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+  --glass-highlight:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.25),
+    inset 1px 0 0 0 rgba(255, 255, 255, 0.06),
+    inset -1px 0 0 0 rgba(0, 0, 0, 0.1);
+  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --glass-shadow-hover: 0 18px 55px rgba(0, 0, 0, 0.45), 0 0 40px rgba(79, 195, 247, 0.1);
+
+  /* Shape & motion */
+  --radius: 16px;
+  --radius-sm: 8px;
+  --radius-pill: 20px;
+  --ease-glass: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-surface text-on-surface antialiased;
+    font-family: "Inter", "IBM Plex Sans", sans-serif;
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background: rgba(79, 195, 247, 0.28);
+    color: #ffffff;
+  }
+}
+
+@layer components {
+  /* ── Liquid glass surfaces ──────────────────────────────────────────────── */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
+  }
+
+  .glass-hover {
+    transition: all 0.3s ease;
+  }
+  .glass-hover:hover {
+    background: var(--glass-bg-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--glass-highlight), var(--glass-shadow-hover);
+  }
+
+  .glass-strong {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+    backdrop-filter: var(--glass-blur-strong);
+    -webkit-backdrop-filter: var(--glass-blur-strong);
+    border: var(--glass-border);
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
+  }
+
+  /* Aliases kept so any unconverted markup still reads as glass, not flat */
+  .ghost-border {
+    border: var(--glass-border);
+  }
+  .card-shadow {
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
+  }
+  .ambient-shadow {
+    box-shadow: var(--glass-shadow-hover);
+  }
+
+  /* ── Section title (centered, gradient underline) ───────────────────────── */
+  .section-title {
+    position: relative;
+    text-align: center;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .section-title::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--accent-gradient);
+  }
+
+  /* ── Chips ──────────────────────────────────────────────────────────────── */
+  .tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+    background: rgba(79, 195, 247, 0.08);
+    border: 1px solid rgba(79, 195, 247, 0.25);
+    border-radius: var(--radius-pill);
+    padding: 4px 12px;
+    white-space: nowrap;
+  }
+  .skill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--glass-bg);
+    border: var(--glass-border);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    transition: all 0.3s ease;
+  }
+  .skill-tag:hover {
+    color: var(--accent);
+    border-color: rgba(79, 195, 247, 0.5);
+    background: rgba(79, 195, 247, 0.08);
+    transform: translateY(-1px);
+  }
+
+  /* ── Buttons ────────────────────────────────────────────────────────────── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #0a0a0f;
+    background: var(--accent-gradient);
+    border-radius: var(--radius-sm);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 24px rgba(79, 195, 247, 0.18);
+    transition: all 0.3s ease;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 40px rgba(79, 195, 247, 0.35);
+  }
+  .btn-glass {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    border-radius: var(--radius-sm);
+    transition: all 0.3s ease;
+  }
+  .btn-glass:hover {
+    color: var(--accent);
+    border-color: rgba(79, 195, 247, 0.5);
+    transform: translateY(-2px);
+  }
+
+  /* ── Ambient glow field (fixed, behind everything) ──────────────────────── */
+  .ambient-field {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    filter: blur(40px);
+  }
+  .ambient-field::before,
+  .ambient-field::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+  }
+  .ambient-field::before {
+    top: -10%;
+    left: -5%;
+    width: 55vw;
+    height: 55vw;
+    background:
+      radial-gradient(circle at 30% 30%, var(--glow-cyan), transparent 60%),
+      radial-gradient(circle at 80% 10%, var(--glow-blue), transparent 55%);
+  }
+  .ambient-field::after {
+    bottom: -15%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
+    background:
+      radial-gradient(circle at 70% 70%, var(--glow-violet), transparent 60%),
+      radial-gradient(circle at 20% 80%, var(--glow-cyan), transparent 55%);
+  }
+}
+
+@layer utilities {
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 25%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.04) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.16); border-radius: 20px; }
+::-webkit-scrollbar-thumb:hover { background-color: rgba(79, 195, 247, 0.5); }
+
+/* Custom range slider */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #4fc3f7;
+  box-shadow: 0 0 12px rgba(79, 195, 247, 0.5);
+  cursor: pointer;
+  margin-top: -8px;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+}
+
+/* Shimmer keyframe for gradient buttons */
+@keyframes shimmer-effect {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.animate-shimmer {
+  animation: shimmer-effect 2s infinite linear;
+}
+
+/* Respect reduced-motion: keep the static ambient glow, stop its perpetual drift. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-drift,
+  .animate-shimmer {
+    animation: none !important;
+  }
+}
