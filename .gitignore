@@ -1,0 +1,112 @@
+# ─── Secrets / env (NEVER commit) ──────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+secrets/
+.credentials/
+
+# ─── Node / Next.js ────────────────────────────────────────────────────────────
+node_modules/
+.next/
+out/
+build/
+dist/
+.turbo/
+.swc/
+*.tsbuildinfo
+next-env.d.ts
+.npm/
+.yarn/
+.pnp.*
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─── Cloudflare / Wrangler ─────────────────────────────────────────────────────
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+wrangler.toml.bak
+.mf/
+.miniflare/
+
+# Local D1 sqlite snapshots (production lives in Cloudflare; local copies are dev-only)
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.db-journal
+
+# ─── Python (Namtheg FastAPI sidecar) ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+.tox/
+.ipynb_checkpoints/
+
+# ─── n8n ───────────────────────────────────────────────────────────────────────
+# Workflow JSON in n8n/workflows/ IS tracked (per PRD §3.8a).
+# Credentials are NEVER tracked — they live in the n8n instance's credential store.
+n8n/credentials/
+n8n/.n8n/
+*.credentials.json
+
+# ─── Testing / coverage ────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+*.lcov
+playwright-report/
+test-results/
+
+# ─── Logs ──────────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ─── IDE / editor ──────────────────────────────────────────────────────────────
+.vscode/
+!.vscode/settings.json.example
+!.vscode/extensions.json
+.idea/
+*.iml
+*.swp
+*.swo
+*~
+
+# ─── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ─── Claude Code local state ───────────────────────────────────────────────────
+# .claude/settings.json IS tracked (project hooks for AGENTS.md auto-update).
+# Personal overrides and ephemeral state are NOT.
+.claude/settings.local.json
+.claude/agents-md-dirty
+.claude/cache/
+.claude/logs/
+
+# ─── Misc ──────────────────────────────────────────────────────────────────────
+*.bak
+*.tmp
+.cache/
