@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_preview.css">
+<style>
+  .sw { display:flex; flex-direction:column; gap:8px; }
+  .chip { width:118px; height:64px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); }
+  .name { font-family:var(--font-heading); font-size:12px; font-weight:600; color:var(--text-primary); }
+  .hex { font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:#0a0a0f;"></div><span class="name">bg-primary</span><span class="hex">#0a0a0f</span></div>
+    <div class="sw"><div class="chip" style="background:#111118;"></div><span class="name">bg-secondary</span><span class="hex">#111118</span></div>
+    <div class="sw"><div class="chip" style="background:#e8e8ed;"></div><span class="name">text-primary</span><span class="hex">#e8e8ed</span></div>
+    <div class="sw"><div class="chip" style="background:#9999a8;"></div><span class="name">text-secondary</span><span class="hex">#9999a8</span></div>
+    <div class="sw"><div class="chip" style="background:#4fc3f7;"></div><span class="name">accent</span><span class="hex">#4fc3f7</span></div>
+    <div class="sw"><div class="chip" style="background:#0288d1;"></div><span class="name">accent-dark</span><span class="hex">#0288d1</span></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="_preview.css">
+<style>
+  .grad { width:280px; height:74px; border-radius:14px; background:var(--accent-gradient); box-shadow:0 8px 30px rgba(79,195,247,0.3); }
+  .glow { width:180px; height:74px; border-radius:14px; background:#0a0a0f; box-shadow:0 0 40px rgba(79,195,247,0.45), inset 0 0 30px rgba(79,195,247,0.15); border:1px solid rgba(79,195,247,0.25); }
+  .name { font-family:var(--font-heading); font-size:12px; font-weight:600; }
+  .hex { font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); }
+</style>
+</head>
+<body>
+  <div class="row" style="gap:22px;">
+    <div class="col" style="gap:8px;">
+      <div class="grad"></div>
+      <span class="name">accent-gradient</span>
+      <span class="hex">linear-gradient(135deg, #4fc3f7, #0288d1)</span>
+    </div>
+    <div class="col" style="gap:8px;">
+      <div class="glow"></div>
+      <span class="name">cyan glow</span>
+      <span class="hex">0 0 40px rgba(79,195,247,0.45)</span>
+    </div>
+  </div>
+</body>
+</html>

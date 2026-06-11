@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="_preview.css">
+<style>
+  .card { width:380px; padding:24px; border-radius:var(--radius); position:relative; overflow:hidden;
+    background:var(--glass-bg); border:var(--glass-border); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
+    box-shadow:var(--glass-highlight), var(--glass-shadow); }
+  .card::before { content:''; position:absolute; top:0; left:0; right:0; height:50%;
+    background:linear-gradient(180deg, rgba(255,255,255,0.05), transparent); pointer-events:none; }
+  h3 { font-family:var(--font-heading); font-size:1.15rem; font-weight:600; margin-bottom:8px; }
+  p { color:var(--text-secondary); font-size:0.9rem; line-height:1.6; margin-bottom:14px; }
+  .tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .tag { background:linear-gradient(135deg, rgba(79,195,247,0.18), rgba(79,195,247,0.06)); color:var(--accent);
+    padding:4px 12px; border-radius:20px; border:1px solid rgba(79,195,247,0.2); font-family:var(--font-mono); font-size:0.72rem; font-weight:600; }
+  .links { display:flex; gap:16px; font-family:var(--font-heading); font-size:0.85rem; color:var(--text-secondary); }
+  .links a { color:var(--text-secondary); }
+  .links i { margin-right:5px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h3>Namtheg AutoML</h3>
+    <p>End-to-end <b>agentic AutoML</b> platform — upload a dataset, pick a target, train, and deploy to a production cloud via API.</p>
+    <div class="tags"><span class="tag">Python</span><span class="tag">FastAPI</span><span class="tag">LangChain</span><span class="tag">Modal</span></div>
+    <div class="links"><a><i class="fab fa-github"></i>Code</a><a><i class="fas fa-external-link-alt"></i>Demo</a></div>
+  </div>
+</body>
+</html>

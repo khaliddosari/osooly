@@ -1,0 +1,239 @@
+/* ============================================================================
+   LIQUID GLASS — Colors & Type Foundations
+   Khalid Al Dosari portfolio design system. Import this file to inherit the
+   full token set (color, glass, type) used across every surface.
+
+   Source of truth: github.com/khaliddosari/portfolio  (static/styles.css :root)
+   Fonts: Thmanyah typeface (github.com/khaliddosari/thmanyah-fonts)
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. BRAND FONTS — Thmanyah typeface (served locally from ./fonts)
+   The live site loads these from jsDelivr; here we ship the .otf locally so
+   the system works offline. Three families + a legacy alias.
+   --------------------------------------------------------------------------- */
+
+/* Thmanyah Serif Display — signature editorial display serif (Arabic + Latin) */
+@font-face {
+    font-family: 'Thmanyah Serif Display';
+    src: url('fonts/thmanyahserifdisplay-Light.otf') format('opentype');
+    font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Serif Display';
+    src: url('fonts/thmanyahserifdisplay-Regular.otf') format('opentype');
+    font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Serif Display';
+    src: url('fonts/thmanyahserifdisplay-Medium.otf') format('opentype');
+    font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Serif Display';
+    src: url('fonts/thmanyahserifdisplay-Bold.otf') format('opentype');
+    font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Serif Display';
+    src: url('fonts/thmanyahserifdisplay-Black.otf') format('opentype');
+    font-weight: 900; font-style: normal; font-display: swap;
+}
+
+/* Thmanyah Serif Text — editorial body serif */
+@font-face {
+    font-family: 'Thmanyah Serif Text';
+    src: url('fonts/thmanyahseriftext-Light.otf') format('opentype');
+    font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Serif Text';
+    src: url('fonts/thmanyahseriftext-Regular.otf') format('opentype');
+    font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Serif Text';
+    src: url('fonts/thmanyahseriftext-Medium.otf') format('opentype');
+    font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Serif Text';
+    src: url('fonts/thmanyahseriftext-Bold.otf') format('opentype');
+    font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Serif Text';
+    src: url('fonts/thmanyahseriftext-Black.otf') format('opentype');
+    font-weight: 900; font-style: normal; font-display: swap;
+}
+
+/* Thmanyah Sans — modern Arabian sans serif */
+@font-face {
+    font-family: 'Thmanyah Sans';
+    src: url('fonts/thmanyahsans-Light.otf') format('opentype');
+    font-weight: 300; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Sans';
+    src: url('fonts/thmanyahsans-Regular.otf') format('opentype');
+    font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Sans';
+    src: url('fonts/thmanyahsans-Medium.otf') format('opentype');
+    font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Sans';
+    src: url('fonts/thmanyahsans-Bold.otf') format('opentype');
+    font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah Sans';
+    src: url('fonts/thmanyahsans-Black.otf') format('opentype');
+    font-weight: 900; font-style: normal; font-display: swap;
+}
+
+/* Legacy alias → maps to Serif Display (kept for backward compatibility) */
+@font-face {
+    font-family: 'Thmanyah';
+    src: url('fonts/thmanyahserifdisplay-Regular.otf') format('opentype');
+    font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+    font-family: 'Thmanyah';
+    src: url('fonts/thmanyahserifdisplay-Bold.otf') format('opentype');
+    font-weight: 700; font-style: normal; font-display: swap;
+}
+
+/* ---------------------------------------------------------------------------
+   2. DESIGN TOKENS
+   --------------------------------------------------------------------------- */
+:root {
+    /* --- Core color palette --- */
+    --bg-primary:      #0a0a0f;                      /* page background (near-black) */
+    --bg-secondary:    #111118;                      /* secondary background */
+    --bg-card:         rgba(255, 255, 255, 0.04);    /* flat card surface */
+    --bg-card-hover:   rgba(255, 255, 255, 0.08);    /* flat card surface (hover) */
+
+    --text-primary:    #e8e8ed;                      /* primary text (off-white) */
+    --text-secondary:  #9999a8;                      /* muted text (cool grey) */
+
+    --accent:          #4fc3f7;                      /* accent — sky cyan */
+    --accent-dark:     #0288d1;                      /* accent — deep ocean blue */
+    --accent-gradient: linear-gradient(135deg, #4fc3f7, #0288d1);
+    --border:          rgba(255, 255, 255, 0.08);    /* hairline border */
+
+    /* Ambient glow hues (the colours the glass refracts) */
+    --glow-cyan:       rgba(79, 195, 247, 0.18);
+    --glow-blue:       rgba(2, 136, 209, 0.15);
+    --glow-violet:     rgba(126, 87, 194, 0.14);
+
+    /* --- Liquid-glass material tokens --- */
+    --glass-bg:        linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+    --glass-bg-hover:  linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+    --glass-blur:        blur(24px) saturate(180%);
+    --glass-blur-strong: blur(32px) saturate(200%);
+    --glass-border:    1px solid rgba(255, 255, 255, 0.12);
+    --glass-highlight:
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.18),
+        inset 0 -1px 0 0 rgba(0, 0, 0, 0.25),
+        inset 1px 0 0 0 rgba(255, 255, 255, 0.06),
+        inset -1px 0 0 0 rgba(0, 0, 0, 0.1);
+    --glass-shadow:        0 12px 40px rgba(0, 0, 0, 0.35);
+    --glass-shadow-hover:  0 18px 55px rgba(0, 0, 0, 0.45), 0 0 40px rgba(79, 195, 247, 0.1);
+
+    /* --- Type families --- */
+    --font:         'Inter', -apple-system, BlinkMacSystemFont, sans-serif;       /* body */
+    --font-heading: 'IBM Plex Sans', -apple-system, sans-serif;                   /* headings, buttons, UI */
+    --font-mono:    'JetBrains Mono', monospace;                                  /* tags, code, technical */
+    --font-display: 'Thmanyah Serif Display', 'IBM Plex Sans Arabic', serif;      /* brand / Arabic display */
+    --font-serif:   'Thmanyah Serif Text', Georgia, serif;                        /* editorial body serif */
+    --font-arabic:  'Thmanyah Sans', 'IBM Plex Sans Arabic', sans-serif;          /* Arabic sans */
+
+    /* --- Shape & motion --- */
+    --radius:     16px;        /* default corner radius */
+    --radius-sm:  8px;         /* buttons, small chips */
+    --radius-pill: 20px;       /* tags / pills */
+    --transition: 0.3s ease;   /* default transition */
+    --ease-glass: cubic-bezier(0.16, 1, 0.3, 1);  /* drawer / premium slide */
+
+    /* --- Spacing scale (8px base) --- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+    --space-9: 100px;          /* .section vertical rhythm */
+
+    /* --- Layout --- */
+    --container-max: 1280px;
+    --container-pad: 24px;
+}
+
+/* ---------------------------------------------------------------------------
+   3. SEMANTIC TYPE ROLES
+   Apply these classes (or copy their declarations) for consistent type.
+   Base sizes assume a 16px root. The live site uses rem throughout.
+   --------------------------------------------------------------------------- */
+.ds-h1,  h1.ds {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;          /* 40px — hero name */
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+.ds-h2, .ds-section-title {
+    font-family: var(--font-heading);
+    font-size: 2rem;            /* 32px — section title (centered, gradient underline) */
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+.ds-h3 {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;         /* ~18px — card title */
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-primary);
+}
+.ds-display-ar {
+    font-family: var(--font-display);   /* Arabic / brand display serif */
+    font-weight: 700;
+    font-feature-settings: "liga" on, "dlig" on, "clig" on, "calt" on, "salt" on,
+        "ss01" on, "ss02" on, "ss03" on, "ss04" on, "ss05" on, "ss06" on, "ss07" on, "ss08" on;
+    text-rendering: optimizeLegibility;
+}
+.ds-tagline {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;          /* ~19px — hero tagline */
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+.ds-body {
+    font-family: var(--font);
+    font-size: 1.05rem;         /* ~17px — paragraph */
+    font-weight: 400;
+    line-height: 1.9;
+    color: var(--text-secondary);
+}
+.ds-small {
+    font-family: var(--font);
+    font-size: 0.9rem;          /* ~14px — meta, dates, details */
+    color: var(--text-secondary);
+}
+.ds-mono {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.ds-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+}
