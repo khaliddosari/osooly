@@ -10,11 +10,31 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
  * exist inside a request's Cloudflare context, so they can't be read at
  * module load.
  */
+declare module "next-auth" {
+  interface Session {
+    user: {
+      /** D1 users.id — the foreign key every Osooly table hangs off. */
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
+  }
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth(async () => {
   const { env } = await getCloudflareContext({ async: true });
   return {
     adapter: D1Adapter(env.DB),
     session: { strategy: "database" },
+    callbacks: {
+      // Database sessions strip the user down to name/email/image by
+      // default; layout persistence (S3+) needs the row id.
+      session({ session, user }) {
+        session.user.id = user.id;
+        return session;
+      },
+    },
     providers: [
       Google({
         clientId: env.AUTH_GOOGLE_ID,

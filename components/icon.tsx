@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  *
  * Usage:  <Icon name="add" className="text-primary" style={{ fontSize: 20 }} />
  */
-const MAP: Record<string, string> = {
+const MAP = {
   // navigation / chrome
   close: "fa-xmark",
   menu: "fa-bars",
@@ -19,6 +19,8 @@ const MAP: Record<string, string> = {
   open_in_new: "fa-arrow-up-right-from-square",
   expand_more: "fa-chevron-down",
   expand_less: "fa-chevron-up",
+  drag_indicator: "fa-grip-vertical",
+  remove: "fa-minus",
   database: "fa-database",
   build: "fa-screwdriver-wrench",
   search: "fa-magnifying-glass",
@@ -79,7 +81,10 @@ const MAP: Record<string, string> = {
   image: "fa-image",
   picture_as_pdf: "fa-file-pdf",
   developer_board: "fa-microchip",
-};
+} as const satisfies Record<string, string>;
+
+/** Semantic icon names the design system recognises (card defs reference these). */
+export type IconName = keyof typeof MAP;
 
 export function Icon({
   name,
@@ -92,7 +97,7 @@ export function Icon({
   style?: React.CSSProperties;
   title?: string;
 }) {
-  const fa = MAP[name] ?? "fa-circle";
+  const fa = (MAP as Record<string, string>)[name] ?? "fa-circle";
   return (
     <i
       aria-hidden="true"

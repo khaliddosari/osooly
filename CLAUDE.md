@@ -104,8 +104,8 @@ diverge.
   PRD; that's enough.
 - **No restated design rules.** They live in the Liquid Glass README. Linking is
   better than mirroring — mirrors drift.
-- **No CI/test instructions yet** beyond the "Running locally" section below — tests
-  arrive with the layout solver in S3.
+- **No CI instructions yet** beyond the "Running locally" section below. Unit tests
+  exist (`npm test`, Vitest) — keep them green; CI wiring lands in S10.
 
 ---
 
@@ -115,6 +115,7 @@ diverge.
 npm install
 npx wrangler d1 migrations apply osooly --local   # create/refresh the local D1 schema
 npm run dev      # http://localhost:3000 → redirects to /dashboard
+npm test         # Vitest unit tests — keep green before any commit
 npm run build    # production build (must stay clean before any commit)
 ```
 
