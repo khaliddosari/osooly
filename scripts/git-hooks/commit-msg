@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# commit-msg — refuses any commit whose message contains AI-attribution patterns.
+#
+# Active because someone in this repo has run:
+#   git config core.hooksPath scripts/git-hooks
+#
+# Mirrors the Claude-specific PreToolUse hook in .claude/settings.json so the policy
+# is enforced for *every* commit attempt regardless of which tool produced it.
+#
+# Repo policy (see CLAUDE.md "No AI attribution — anywhere, ever" and AGENTS.md §4):
+# never add Co-Authored-By: Claude, "Generated with Claude Code", 🤖 sign-offs, or
+# any equivalent line to commits, PRs, code, or docs.
+
+set -e
+
+msg_file="$1"
+[ -z "$msg_file" ] && exit 0
+[ ! -f "$msg_file" ] && exit 0
+
+# Patterns blocked (case-insensitive). Mirror scripts/block-ai-attribution.ps1.
+patterns=(
+  'co-authored-by:[[:space:]]*claude'
+  'co-authored-by:[[:space:]]*anthropic'
+  'generated[[:space:]]+with[[:space:]]+claude[[:space:]]*code'
+  'noreply@anthropic\.com'
+  '🤖[[:space:]]*generated'
+  'made[[:space:]]+with[[:space:]]+claude'
+  'powered[[:space:]]+by[[:space:]]+claude'
+  'authored[[:space:]]+by[[:space:]]+claude'
+  'claude[[:space:]]+<noreply'
+)
+
+for p in "${patterns[@]}"; do
+  if grep -Eiq "$p" "$msg_file"; then
+    cat >&2 <<EOF
+
+✗ commit refused: AI-attribution pattern detected (matched: $p)
+
+Repo policy: never add Co-Authored-By: Claude, "Generated with Claude Code",
+🤖 sign-offs, or any equivalent attribution line. See CLAUDE.md
+("No AI attribution — anywhere, ever") and AGENTS.md §4.
+
+Rewrite the commit message without attribution and try again.
+
+EOF
+    exit 1
+  fi
+done
+
+exit 0

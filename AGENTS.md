@@ -121,6 +121,18 @@ projects exist, **update AGENTS.md in the same commit** as the change that trigg
 it. The Stop hook will mark this file dirty if you forget; the UserPromptSubmit hook
 on your next session will remind you.
 
+### No-AI-attribution rule
+**Never credit yourself in this repo.** No `Co-Authored-By: Claude …` /
+`Co-Authored-By: Anthropic …`, no `Generated with Claude Code`, no `🤖` sign-offs in
+commit messages, PR descriptions, code comments, or docs. Author identity stays the
+human's; `git config user.name` / `user.email` are never touched. If the user
+explicitly asks for a credit line, ask them to confirm the exact text in chat.
+
+A `PreToolUse` hook in [`.claude/settings.json`](.claude/settings.json) runs
+[`scripts/block-ai-attribution.ps1`](scripts/block-ai-attribution.ps1) and rejects any
+`git commit` containing AI-attribution patterns — it's a safety net, not the primary
+expectation. Don't write those strings in the first place.
+
 ### Working conventions
 - **Where new cards go:** `src/cards/<card-id>/` — one folder per card, exporting a
   `CardDefinition` from `index.ts`. Auto-discovered, no registry edit needed.
