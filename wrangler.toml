@@ -1,0 +1,16 @@
+# Osooly — Cloudflare config.
+# For now this wires the D1 binding for local dev (`next dev` via
+# initOpenNextCloudflareForDev) and migrations. The Workers deploy config
+# (main, assets, routes) lands with S10.
+
+name = "osooly"
+compatibility_date = "2026-05-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "osooly"
+# Placeholder so local commands work out of the box. For the real database run
+# `wrangler d1 create osooly` and paste the id it prints here (S10).
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"

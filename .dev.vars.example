@@ -1,0 +1,12 @@
+# Local secrets for `npm run dev`. Copy to `.dev.vars` (gitignored) and fill
+# in. Production values are set with `wrangler secret put <NAME>` (S10).
+
+# NextAuth session/cookie encryption secret. Generate one with:
+#   openssl rand -base64 32        (or: npx auth secret)
+AUTH_SECRET=""
+
+# Google OAuth 2.0 client (https://console.cloud.google.com/apis/credentials).
+# Application type: Web application. Authorized redirect URI for local dev:
+#   http://localhost:3000/api/auth/callback/google
+AUTH_GOOGLE_ID=""
+AUTH_GOOGLE_SECRET=""

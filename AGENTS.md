@@ -21,15 +21,17 @@
 dashboard of user-composed cards over a unified asset ledger, with LangGraph agents
 recommending actions per asset class.
 
-- **Stage:** v1 implementation in progress — S1 (scaffolding + visual shell) shipped:
-  Next.js 15 + TypeScript + Tailwind with the Liquid Glass tokens, header/footer shell,
-  ambient glow, and the empty-state dashboard. S2+ (auth, D1, cards, agents) pending —
+- **Stage:** v1 implementation in progress — S1 (scaffolding + visual shell) and S2
+  (NextAuth Google sign-in + the base D1 schema via Wrangler migrations) shipped.
+  S3+ (cards, market data, agents) pending —
   see [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
 - **Repo layout (current):**
   - `Docs/PRD.md` — the source of truth (this file's parent doc)
   - `Docs/Liquid Glass-Portfolio Design System/` — visual source of truth
   - `Docs/IMPLEMENTATION-STAGES.md` — the 10-stage v1 slicing plan
-  - `app/`, `components/`, `lib/`, `public/` — the Next.js app (S1 visual shell)
+  - `app/`, `components/`, `lib/`, `public/` — the Next.js app (S1 shell, S2 auth)
+  - `migrations/` + `wrangler.toml` — D1 schema, applied via
+    `wrangler d1 migrations apply osooly`
   - `Namtheg/AutoML/` — the sibling project being ported into Osooly (read-only)
 - **Canonical version of this block:** [PRD §3.1 Product overview](Docs/PRD.md#31-product-overview)
 

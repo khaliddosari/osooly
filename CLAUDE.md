@@ -113,9 +113,12 @@ diverge.
 
 ```
 npm install
+npx wrangler d1 migrations apply osooly --local   # create/refresh the local D1 schema
 npm run dev      # http://localhost:3000 → redirects to /dashboard
 npm run build    # production build (must stay clean before any commit)
 ```
 
-No env vars are needed yet (auth + D1 land in S2; `.dev.vars.example` will document
-them then).
+Secrets live in `.dev.vars` (gitignored) — copy `.dev.vars.example` and fill in
+`AUTH_SECRET` plus the Google OAuth client pair (Google sign-in won't round-trip
+without them; everything else runs fine). `next dev` picks up the D1 binding and
+`.dev.vars` automatically via `initOpenNextCloudflareForDev()` in `next.config.ts`.
