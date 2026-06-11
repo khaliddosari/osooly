@@ -115,6 +115,15 @@ rest.
 way around. If you find yourself writing code that contradicts the PRD, stop and either
 (a) push back on the change and re-spec, or (b) update the PRD in the same PR.
 
+### One-stage-per-PR rule (v1 implementation)
+**v1 is sliced into 10 tightly-scoped stages in
+[`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md). Work one stage per
+PR. Never bundle stages.** Each stage groups only what must share context (e.g. auth
++ base D1 schemas land together because the `users` table is created by the auth
+adapter). Independent work is its own stage. Pick a stage whose `Blocked by` list is
+satisfied by `git log` and the repo state. PR title and commit subject should name
+the stage (`S3: card system primitives`).
+
 ### Continuous-update rule
 If you change product scope, design tokens, the card contract, or which sibling
 projects exist, **update AGENTS.md in the same commit** as the change that triggered
