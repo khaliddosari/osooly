@@ -259,6 +259,15 @@ version-controlled as exported JSON in `n8n/workflows/` in this repo.
 
 ---
 
+## 3.8b Writing-style constraints
+
+- **No em dashes.** The em dash character (U+2014, `—`) is prohibited in all repo
+  content: docs, code comments, commit messages, PR descriptions, and generated
+  output. Use alternatives: semicolons, commas, parentheses, colons, or separate
+  sentences. This rule applies to human-written and AI-generated text alike.
+
+---
+
 ## 3.9 Non-functional requirements
 
 - **Performance:** dashboard TTI < 1.5s on a warm cache; card data lazy-fetched per

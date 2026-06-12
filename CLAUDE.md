@@ -81,6 +81,16 @@ strings.
 
 ---
 
+## No em dashes
+
+**The em dash character (`—`, U+2014) is prohibited everywhere in this repo.** That
+includes docs, code comments, commit messages, PR descriptions, and any text you
+generate. Use semicolons, commas, parentheses, colons, or separate sentences instead.
+
+See [PRD §3.8b](Docs/PRD.md#38b-writing-style-constraints) for the canonical rule.
+
+---
+
 ## PRD-first rule (mirrors AGENTS.md §4)
 
 **Before you change any of:**

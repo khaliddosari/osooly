@@ -155,6 +155,12 @@ A `PreToolUse` hook in [`.claude/settings.json`](.claude/settings.json) runs
 `git commit` containing AI-attribution patterns — it's a safety net, not the primary
 expectation. Don't write those strings in the first place.
 
+### No em dashes
+**The em dash character (`—`, U+2014) is banned from all repo content:** docs, code
+comments, commit messages, PR descriptions, and generated output. Use semicolons,
+commas, parentheses, colons, or separate sentences instead.
+[PRD §3.8b](Docs/PRD.md#38b-writing-style-constraints)
+
 ### Working conventions
 - **Where new cards go:** `src/cards/<card-id>/` — one folder per card, exporting a
   `CardDefinition` from `index.ts`. Auto-discovered, no registry edit needed.
