@@ -21,13 +21,15 @@
 dashboard of user-composed cards over a unified asset ledger, with LangGraph agents
 recommending actions per asset class.
 
-- **Stage:** v1 implementation in progress — S1 (scaffolding + visual shell), S2
+- **Stage:** v1 implementation in progress: S1 (scaffolding + visual shell), S2
   (NextAuth Google sign-in + the base D1 schema via Wrangler migrations), S3
   (card system primitives: CardDefinition contract, layoutSolver, dnd-kit grid,
   Customize sheet, layout persistence), S4 (market data infra: market_snapshot
   shared cache, the four adapter families, the cron Worker in `workers/cron/`),
-  and S5 (the four v1 market cards in `src/cards/`, wired to the shared cache
-  with S6 agent-tool stubs) shipped. S6+ (agents, alerts, Namtheg port) pending;
+  S5 (the four v1 market cards in `src/cards/`), and S6 (agentic layer: the
+  LangGraph supervisor + per-class sub-agents in `lib/agent/`, real agent tools
+  in `src/agent/tools/`, Vectorize RAG in `lib/rag/`, recommendations rendered
+  in-card) shipped. S7+ (alerts, Namtheg port) pending;
   see [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
 - **Repo layout (current):**
   - `Docs/PRD.md` — the source of truth (this file's parent doc)
@@ -38,7 +40,11 @@ recommending actions per asset class.
   - `src/cards/` — card modules, one folder per card (S5: stock-market,
     real-estate-market, automobile-market, jewelry-market)
   - `src/adapters/` — data-source adapters (PRD §3.5a rule 4) + the polite fetcher
-  - `workers/cron/` — the market-refresh Cron Worker (own wrangler.toml, same D1)
+  - `src/agent/tools/`: the per-asset-class agent tools the cards list in
+    `agentTools` (S6); `lib/agent/` + `lib/rag/` hold the LangGraph orchestrator
+    and the Vectorize RAG layer
+  - `workers/cron/`: the market-refresh + news-refresh Cron Worker (own
+    wrangler.toml, same D1)
   - `migrations/` + `wrangler.toml` — D1 schema, applied via
     `wrangler d1 migrations apply osooly`
   - `Namtheg/AutoML/` — the sibling project being ported into Osooly (read-only)

@@ -32,13 +32,16 @@ describe("card registry (S5)", () => {
     }
   });
 
-  it("declares agent tools as loud S6 stubs, never silent fakes", async () => {
+  it("declares real, server-bound agent tools (S6)", async () => {
     for (const card of listCards()) {
       expect(card.agentTools?.length).toBeGreaterThan(0);
       for (const tool of card.agentTools ?? []) {
         expect(tool.name).toMatch(/^[a-z_]+$/);
         expect(tool.description.length).toBeGreaterThan(0);
-        await expect(tool.invoke({})).rejects.toThrow(/S6/);
+        expect(tool.inputSchema).toBeDefined();
+        // Real implementations resolve D1 through the card server context;
+        // outside a server runtime they must fail loudly, never fabricate.
+        await expect(tool.invoke({})).rejects.toThrow(/server/);
       }
     }
   });

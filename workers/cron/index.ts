@@ -2,11 +2,13 @@ import { refreshAutos } from "./autos";
 import {
   CRON_AUTOS,
   CRON_GOLD,
+  CRON_NEWS,
   CRON_REAL_ESTATE,
   CRON_STOCKS,
   type CronEnv,
 } from "./config";
 import { refreshGold } from "./gold";
+import { refreshNews } from "./news-refresh";
 import { refreshRealEstate } from "./realestate";
 import { refreshStocks } from "./stocks";
 
@@ -20,6 +22,7 @@ import { refreshStocks } from "./stocks";
  *   jewelry      0 22 * * *        nightly 01:00 AST
  *   autos        30 22 * * *       nightly 01:30 AST
  *   real estate  0 23 * * *        nightly 02:00 AST
+ *   news corpus  30 23 * * *       nightly 02:30 AST (RAG, PRD 3.6)
  *
  * Run locally with:
  *   npx wrangler dev --config workers/cron/wrangler.toml --test-scheduled
@@ -35,6 +38,7 @@ const JOBS: Record<string, (env: CronEnv) => Promise<void>> = {
   [CRON_GOLD]: refreshGold,
   [CRON_AUTOS]: refreshAutos,
   [CRON_REAL_ESTATE]: refreshRealEstate,
+  [CRON_NEWS]: refreshNews,
 };
 
 export default {

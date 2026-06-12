@@ -1,5 +1,9 @@
 import type { CardServerContext } from "@/lib/cards/server-context";
 import { readSnapshots, type SnapshotReading } from "@/lib/market-snapshot";
+import {
+  readLatestRecommendations,
+  type RecommendationView,
+} from "@/lib/recommendations";
 
 /** The index headline every user sees, holdings or not (PRD §3.5). */
 export const TASI_SYMBOL = "TASI";
@@ -18,6 +22,8 @@ export interface StockHolding {
 export interface StockMarketData {
   index: SnapshotReading | null;
   holdings: StockHolding[];
+  /** Latest agent calls for this card (PRD §3.6), newest first. */
+  recommendations: RecommendationView[];
 }
 
 interface AssetRow {
@@ -60,11 +66,15 @@ export async function fetchStockMarketData({
         .filter((symbol): symbol is string => Boolean(symbol)),
     ]),
   ];
-  const snapshots = await readSnapshots(db, "stocks", symbols);
+  const [snapshots, recommendations] = await Promise.all([
+    readSnapshots(db, "stocks", symbols),
+    userId ? readLatestRecommendations(db, userId, "stock-market") : [],
+  ]);
   const bySymbol = new Map(snapshots.map((s) => [s.symbol, s]));
 
   return {
     index: bySymbol.get(TASI_SYMBOL) ?? null,
+    recommendations,
     holdings: holdings.map((row) => ({
       assetId: row.id,
       name: row.name,

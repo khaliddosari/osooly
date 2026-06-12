@@ -14,3 +14,15 @@ database_name = "osooly"
 # `wrangler d1 create osooly` and paste the id it prints here (S10).
 database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "migrations"
+
+# RAG bindings for the S6 agentic layer (PRD 3.6). Commented out until deploy
+# (S10): wrangler has no local Vectorize simulator, and the index must first
+# be created per the setup commands in lib/rag/vectorize.ts. The agent runs
+# without RAG context while these are absent.
+#
+# [ai]
+# binding = "AI"
+#
+# [[vectorize]]
+# binding = "VECTORIZE"
+# index_name = "osooly-rag"

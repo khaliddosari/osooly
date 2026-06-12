@@ -5,6 +5,10 @@ import {
   usableReading,
   type SnapshotReading,
 } from "@/lib/market-snapshot";
+import {
+  readLatestRecommendations,
+  type RecommendationView,
+} from "@/lib/recommendations";
 
 /** The one symbol the gold cron writes: SAR/gram fine-gold spot. */
 export const GOLD_SYMBOL = "XAU";
@@ -33,6 +37,8 @@ export interface JewelryMarketData {
   totalMarketValueSar: number | null;
   /** Fallback per PRD §3.5a rule 2: sum of user-entered purchase prices. */
   totalPurchaseValue: number;
+  /** Latest agent calls for this card (PRD §3.6), newest first. */
+  recommendations: RecommendationView[];
 }
 
 interface AssetRow {
@@ -53,7 +59,10 @@ export async function fetchJewelryMarketData({
   db,
   userId,
 }: CardServerContext): Promise<JewelryMarketData> {
-  const [spot] = await readSnapshots(db, "jewelry", [GOLD_SYMBOL]);
+  const [[spot], recommendations] = await Promise.all([
+    readSnapshots(db, "jewelry", [GOLD_SYMBOL]),
+    userId ? readLatestRecommendations(db, userId, "jewelry-market") : [],
+  ]);
   const rows = userId
     ? (
         await db
@@ -97,6 +106,7 @@ export async function fetchJewelryMarketData({
     totalPurchaseValue: round2(
       pieces.reduce((sum, p) => sum + (p.purchasePrice ?? 0), 0)
     ),
+    recommendations,
   };
 }
 

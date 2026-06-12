@@ -1,6 +1,7 @@
 "use client";
 
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
+import { RecommendationList } from "@/components/recommendation-list";
 import type { CardProps } from "@/lib/cards/types";
 import { formatMoney } from "@/lib/format";
 import { usableReading } from "@/lib/market-snapshot";
@@ -24,6 +25,7 @@ export function RealEstateMarketCard({ data }: CardProps) {
     <div className="flex h-full flex-col gap-5">
       <CityTrends cities={market.cities} />
       <Properties properties={market.properties} />
+      <RecommendationList recommendations={market.recommendations} />
     </div>
   );
 }

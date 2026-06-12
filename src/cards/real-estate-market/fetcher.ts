@@ -1,5 +1,9 @@
 import type { CardServerContext } from "@/lib/cards/server-context";
 import { readSnapshots, type SnapshotReading } from "@/lib/market-snapshot";
+import {
+  readLatestRecommendations,
+  type RecommendationView,
+} from "@/lib/recommendations";
 import { slugify } from "../../adapters/scrape-stats";
 
 /** Aqar rows share the city slug with REGA rows, suffixed per source. */
@@ -26,6 +30,8 @@ export interface PropertySummary {
 export interface RealEstateMarketData {
   cities: CityMarket[];
   properties: PropertySummary[];
+  /** Latest agent calls for this card (PRD §3.6), newest first. */
+  recommendations: RecommendationView[];
 }
 
 interface AssetRow {
@@ -46,7 +52,10 @@ export async function fetchRealEstateMarketData({
   db,
   userId,
 }: CardServerContext): Promise<RealEstateMarketData> {
-  const snapshots = await readSnapshots(db, "real_estate");
+  const [snapshots, recommendations] = await Promise.all([
+    readSnapshots(db, "real_estate"),
+    userId ? readLatestRecommendations(db, userId, "real-estate-market") : [],
+  ]);
   const indexBySlug = new Map<string, SnapshotReading>();
   const aqarBySlug = new Map<string, SnapshotReading>();
   for (const snapshot of snapshots) {
@@ -104,6 +113,7 @@ export async function fetchRealEstateMarketData({
       comparables: aqarBySlug.get(slug) ?? null,
     })),
     properties,
+    recommendations,
   };
 }
 

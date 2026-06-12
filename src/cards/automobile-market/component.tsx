@@ -2,6 +2,7 @@
 
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
 import { Icon } from "@/components/icon";
+import { RecommendationList } from "@/components/recommendation-list";
 import type { CardProps } from "@/lib/cards/types";
 import { asNumber, formatMoney, formatSignedPercent } from "@/lib/format";
 import { usableReading, type SnapshotReading } from "@/lib/market-snapshot";
@@ -35,11 +36,14 @@ export function AutomobileMarketCard({ data }: CardProps) {
   }
 
   return (
-    <ul className="flex flex-col divide-y divide-outline-variant">
-      {market.vehicles.map((vehicle) => (
-        <VehicleRow key={vehicle.assetId} vehicle={vehicle} />
-      ))}
-    </ul>
+    <div className="flex h-full flex-col gap-5">
+      <ul className="flex flex-col divide-y divide-outline-variant">
+        {market.vehicles.map((vehicle) => (
+          <VehicleRow key={vehicle.assetId} vehicle={vehicle} />
+        ))}
+      </ul>
+      <RecommendationList recommendations={market.recommendations} />
+    </div>
   );
 }
 

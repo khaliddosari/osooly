@@ -9,4 +9,14 @@ interface CloudflareEnv {
   AUTH_SECRET: string;
   AUTH_GOOGLE_ID: string;
   AUTH_GOOGLE_SECRET: string;
+
+  // S6 agentic layer (PRD §3.6). The model keys gate POST /api/agent/run
+  // (503 without them); the RAG bindings are optional everywhere because
+  // local dev has no Vectorize simulator (lib/rag/vectorize.ts degrades).
+  DEEPSEEK_API_KEY?: string;
+  GROQ_API_KEY?: string;
+  DEEPSEEK_MODEL?: string;
+  GROQ_MODEL?: string;
+  AI?: Ai;
+  VECTORIZE?: VectorizeIndex;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
+import { RecommendationList } from "@/components/recommendation-list";
 import type { CardProps } from "@/lib/cards/types";
 import { asNumber, formatMoney } from "@/lib/format";
 import { usableReading } from "@/lib/market-snapshot";
@@ -20,6 +21,7 @@ export function JewelryMarketCard({ data }: CardProps) {
     <div className="flex h-full flex-col gap-5">
       <SpotHeadline spot={market.spot} />
       <Inventory market={market} />
+      <RecommendationList recommendations={market.recommendations} />
     </div>
   );
 }

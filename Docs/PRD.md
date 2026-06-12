@@ -169,9 +169,16 @@ v1 data sources are deliberately zero-cost, which forces four architectural rule
 - **Models:** **DeepSeek** (via DeepSeek direct API or OpenRouter) for reasoning-heavy
   recommendation drafts; **Groq** (Llama-3.1-70B or similar) for fast classification /
   summarization. Selection is policy-based (cheap-first, escalate on low confidence).
-- **RAG corpus:** two collections in a Cloudflare Vectorize index —
+- **RAG corpus:** two collections in a single Cloudflare Vectorize index
+  (separated by a `corpus` metadata field):
   (a) the user's own asset ledger + transaction history (private per `user_id`),
-  (b) a market-news corpus refreshed by a Cloudflare Cron Worker daily.
+  (b) a market-news corpus pulled from keyless RSS feeds (Google News RSS queries
+  per asset class; the feed list is overridable via the `NEWS_FEEDS` env var) and
+  refreshed by a Cloudflare Cron Worker daily.
+- **Embeddings:** Workers AI `@cf/baai/bge-m3` (multilingual, covers EN + AR
+  headlines; 1024-dim, cosine). Keyless via the `AI` binding, so the free-tier
+  rules in §3.5a hold. When the Vectorize or AI binding is unavailable (local
+  dev), the agent runs without RAG context instead of failing.
 - **Refresh cadence:** background Cloudflare Workers Cron jobs per asset class — stocks
   every **1 min during market hours**; real-estate / autos / jewelry nightly.
 - **Recommendation surface:** structured `Recommendation` rows in D1 — `asset_id`,
@@ -216,7 +223,8 @@ proxy so cookies and CORS stay simple.
 - **Database:** Cloudflare D1 (SQLite at the edge). Schemas: `users`, `assets`,
   `transactions`, `recommendations`, `alerts`, `user_dashboard_layout`,
   `card_registry_overrides`, `market_snapshot`.
-- **Vector store:** Cloudflare Vectorize for the dual RAG corpora.
+- **Vector store:** Cloudflare Vectorize for the dual RAG corpora; embeddings via
+  Workers AI `@cf/baai/bge-m3` (§3.6).
 - **Agentic layer:** LangChain + LangGraph; runs in a Cloudflare Worker (or Node.js
   sidecar if Worker constraints bite). DeepSeek + Groq via their HTTPS APIs.
 - **AutoML sidecar:** the ported Namtheg FastAPI service (§3.7) — shares D1, called by
@@ -299,6 +307,8 @@ version-controlled as exported JSON in `n8n/workflows/` in this repo.
     `EXCHANGERATE_ACCESS_KEY` is configured.
   - Autos → Syarah + Haraj scrape (polite scraping per §3.5a)
   - Real estate → REGA govt index primary + Aqar scrape secondary
+  - Market news (RAG corpus, §3.6) → Google News RSS queries per asset class,
+    keyless; feed list overridable via `NEWS_FEEDS`
 - All paid-upgrade decisions deferred until real usage data exists. The adapter pattern
   in §3.5a makes the swap a one-file change.
 

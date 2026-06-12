@@ -6,6 +6,10 @@ import {
   type PricedReading,
   type SnapshotReading,
 } from "@/lib/market-snapshot";
+import {
+  readLatestRecommendations,
+  type RecommendationView,
+} from "@/lib/recommendations";
 import { slugify } from "../../adapters/scrape-stats";
 
 export interface VehicleValuation {
@@ -26,6 +30,8 @@ export interface VehicleValuation {
 
 export interface AutoMarketData {
   vehicles: VehicleValuation[];
+  /** Latest agent calls for this card (PRD §3.6), newest first. */
+  recommendations: RecommendationView[];
 }
 
 interface AssetRow {
@@ -72,8 +78,10 @@ export async function fetchAutoMarketData({
       })
     ),
   ];
-  const snapshots =
-    symbols.length > 0 ? await readSnapshots(db, "autos", symbols) : [];
+  const [snapshots, recommendations] = await Promise.all([
+    symbols.length > 0 ? readSnapshots(db, "autos", symbols) : [],
+    userId ? readLatestRecommendations(db, userId, "automobile-market") : [],
+  ]);
   const bySymbol = new Map(snapshots.map((s) => [s.symbol, s]));
 
   const vehicles: VehicleValuation[] = targets.map(
@@ -107,7 +115,7 @@ export async function fetchAutoMarketData({
     }
   );
 
-  return { vehicles };
+  return { vehicles, recommendations };
 }
 
 function parseVehicleDetails(details: string | null): {
