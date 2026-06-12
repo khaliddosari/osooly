@@ -42,6 +42,11 @@ const MAP = {
   account: "fa-user",
   subscription: "fa-credit-card",
 
+  // asset classes (card registry)
+  apartment: "fa-building",
+  directions_car: "fa-car",
+  diamond: "fa-gem",
+
   // upload / files
   cloud_upload: "fa-cloud-arrow-up",
   upload_file: "fa-file-arrow-up",

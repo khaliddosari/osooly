@@ -86,6 +86,25 @@ export function formatAge(ageMs: number): string {
   return `${Math.floor(hours / 24)}d`;
 }
 
+/**
+ * A reading whose price a card may show (PRD §3.5a rule 2): the row exists,
+ * has a price, and hasn't aged past the "unavailable" cutoff. Stale readings
+ * pass (cards show the last-known price plus the badge); unavailable ones
+ * return null so callers fall back to user-entered values.
+ */
+export interface PricedReading extends SnapshotReading {
+  price: number;
+}
+
+export function usableReading(
+  reading: SnapshotReading | null | undefined
+): PricedReading | null {
+  if (!reading || reading.freshness === "unavailable" || reading.price === null) {
+    return null;
+  }
+  return reading as PricedReading;
+}
+
 /** SQLite CURRENT_TIMESTAMP is UTC without a zone suffix — pin it. */
 function parseSqliteUtc(value: string): Date {
   const normalised = /[zZ]|[+-]\d\d:\d\d$/.test(value)

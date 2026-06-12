@@ -24,9 +24,10 @@ recommending actions per asset class.
 - **Stage:** v1 implementation in progress — S1 (scaffolding + visual shell), S2
   (NextAuth Google sign-in + the base D1 schema via Wrangler migrations), S3
   (card system primitives: CardDefinition contract, layoutSolver, dnd-kit grid,
-  Customize sheet, layout persistence), and S4 (market data infra: market_snapshot
-  shared cache, the four adapter families, the cron Worker in `workers/cron/`)
-  shipped. S5+ (the four cards, agents) pending —
+  Customize sheet, layout persistence), S4 (market data infra: market_snapshot
+  shared cache, the four adapter families, the cron Worker in `workers/cron/`),
+  and S5 (the four v1 market cards in `src/cards/`, wired to the shared cache
+  with S6 agent-tool stubs) shipped. S6+ (agents, alerts, Namtheg port) pending;
   see [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
 - **Repo layout (current):**
   - `Docs/PRD.md` — the source of truth (this file's parent doc)
@@ -34,7 +35,8 @@ recommending actions per asset class.
   - `Docs/IMPLEMENTATION-STAGES.md` — the 10-stage v1 slicing plan
   - `app/`, `components/`, `lib/`, `public/` — the Next.js app (S1 shell, S2 auth,
     S3 card system: `lib/cards/` + the dashboard grid / Customize sheet components)
-  - `src/cards/` — card modules (one folder per card; empty until S5)
+  - `src/cards/` — card modules, one folder per card (S5: stock-market,
+    real-estate-market, automobile-market, jewelry-market)
   - `src/adapters/` — data-source adapters (PRD §3.5a rule 4) + the polite fetcher
   - `workers/cron/` — the market-refresh Cron Worker (own wrangler.toml, same D1)
   - `migrations/` + `wrangler.toml` — D1 schema, applied via

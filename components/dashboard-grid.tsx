@@ -25,7 +25,14 @@ import { PagePills } from "./page-pills";
  * exactly what gets persisted. Drag handles are card title bars; dropping on
  * another card reorders, dropping on a page pill moves the card to that page.
  */
-export function DashboardGrid({ initialOrder }: { initialOrder: string[] }) {
+export function DashboardGrid({
+  initialOrder,
+  initialData,
+}: {
+  initialOrder: string[];
+  /** Per-card resolved fetcher payloads (lib/cards/resolve-data.ts). */
+  initialData?: Record<string, unknown>;
+}) {
   const [order, setOrder] = useState(initialOrder);
   const [activePage, setActivePage] = useState(1);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -101,7 +108,11 @@ export function DashboardGrid({ initialOrder }: { initialOrder: string[] }) {
           }}
         >
           {pageRects.map((rect) => (
-            <GridCard key={rect.cardId} rect={rect} />
+            <GridCard
+              key={rect.cardId}
+              rect={rect}
+              data={initialData?.[rect.cardId]}
+            />
           ))}
         </div>
 
@@ -122,7 +133,7 @@ export function DashboardGrid({ initialOrder }: { initialOrder: string[] }) {
   );
 }
 
-function GridCard({ rect }: { rect: CardRect }) {
+function GridCard({ rect, data }: { rect: CardRect; data?: unknown }) {
   const def = getCard(rect.cardId);
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({ id: rect.cardId });
@@ -168,7 +179,7 @@ function GridCard({ rect }: { rect: CardRect }) {
           />
         </header>
         <div className="flex-1 overflow-auto p-5">
-          <def.Component size={{ w: rect.w, h: rect.h }} />
+          <def.Component size={{ w: rect.w, h: rect.h }} data={data} />
         </div>
       </div>
     </section>

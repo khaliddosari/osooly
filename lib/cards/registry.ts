@@ -1,3 +1,7 @@
+import { automobileMarketCard } from "@/src/cards/automobile-market";
+import { jewelryMarketCard } from "@/src/cards/jewelry-market";
+import { realEstateMarketCard } from "@/src/cards/real-estate-market";
+import { stockMarketCard } from "@/src/cards/stock-market";
 import type { CardCategory, CardDefinition } from "./types";
 
 /**
@@ -5,13 +9,14 @@ import type { CardCategory, CardDefinition } from "./types";
  * `src/cards/<card-id>/` exporting a CardDefinition, plus one import line
  * here. The Customize sheet and the dashboard grid only ever see this list.
  *
- * The v1 catalogue lands in S5 — one line per card:
- *
- *   import { stockMarketCard } from "@/src/cards/stock-market";
- *   ...and add it to CARDS below.
+ * Order matters twice: it is the Customize sheet's listing order within a
+ * category, and the PRD §3.5 catalogue order is kept here for the v1 four.
  */
 const CARDS: CardDefinition[] = [
-  // S5: stock-market, real-estate-market, automobile-market, jewelry-market
+  stockMarketCard,
+  realEstateMarketCard,
+  automobileMarketCard,
+  jewelryMarketCard,
 ];
 
 const ORDERED_CATEGORIES: CardCategory[] = ["market", "portfolio", "tools"];

@@ -3,6 +3,7 @@ import { DashboardGrid } from "@/components/dashboard-grid";
 import { EmptyStateCard } from "@/components/empty-state-card";
 import { auth } from "@/lib/auth";
 import { loadCardOrder } from "@/lib/cards/layout-store";
+import { resolveCardData } from "@/lib/cards/resolve-data";
 
 export const metadata: Metadata = {
   title: "Dashboard — Osooly",
@@ -25,5 +26,6 @@ export default async function DashboardPage() {
     );
   }
 
-  return <DashboardGrid initialOrder={order} />;
+  const initialData = await resolveCardData(order);
+  return <DashboardGrid initialOrder={order} initialData={initialData} />;
 }
