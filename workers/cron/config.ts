@@ -11,6 +11,11 @@ export interface CronEnv {
   SCRAPER_CONTACT?: string;
   /** Comma-separated extra stock symbols to track platform-wide. */
   STOCK_SYMBOLS?: string;
+  /**
+   * Optional exchangerate.host access key; without it the USD→SAR rate
+   * comes from the keyless open.er-api.com feed (PRD §3.10).
+   */
+  EXCHANGERATE_ACCESS_KEY?: string;
   /** Override for the REGA open-data dataset URL. */
   REGA_INDEX_URL?: string;
 }

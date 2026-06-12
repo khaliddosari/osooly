@@ -132,7 +132,7 @@ by category. **Adding `real-estate-market` is: drop a folder, export the def, do
 | `stock-market` | **Twelve Data free tier** (TASI + global indices, 800 req/day, 8 req/min cap — see §3.5a) | Watches user's holdings, flags drift vs. target allocation |
 | `real-estate-market` | **REGA / Ministry of Justice transaction index** (primary, official) + **Aqar.fm scrape** (live comparables) + user-entered properties | Estimates current value, flags neighborhood-level shifts |
 | `automobile-market` | **Syarah + Haraj scrape** (nightly Cron Worker, per user-saved make/model) + user-entered vehicles | Tracks depreciation, suggests sell/hold windows |
-| `jewelry-market` | **metals.live** (free gold spot) + **exchangerate.host** (SAR/gram) + user-entered pieces | Re-prices the user's gram-weighted inventory daily |
+| `jewelry-market` | **gold-api.com** (free gold spot, keyless) + **open.er-api.com** (USD→SAR daily, keyless; exchangerate.host supported when an access key is configured) + user-entered pieces | Re-prices the user's gram-weighted inventory daily |
 
 ---
 
@@ -145,17 +145,20 @@ v1 data sources are deliberately zero-cost, which forces four architectural rule
    it; every user's card reads from it. With Twelve Data's 800 req/day cap, per-user
    fanout would burn the budget after ~10 users — shared cache makes the limit
    user-count-independent.
-2. **Graceful degradation.** `metals.live` has spotty uptime. The gold card must show
-   the **last-known price** with a small *"stale (last updated Xh ago)"* badge rather
-   than an error state. The agent treats stale data as low-confidence input.
+2. **Graceful degradation.** Free spot feeds die without notice — `metals.live`, the
+   original v1 gold source, went dark entirely in mid-2026 and was swapped for
+   gold-api.com behind the adapter seam. The gold card must show the **last-known
+   price** with a small *"stale (last updated Xh ago)"* badge rather than an error
+   state. The agent treats stale data as low-confidence input.
 3. **Scraping etiquette.** Syarah / Haraj / Aqar scrapers honour `robots.txt` where
    present, rate-limit to ≤1 req/sec/domain, identify themselves with a clear
    User-Agent (`Osooly/1.0 (+contact-email)`), and cache results aggressively. After N
    consecutive failures, the card surfaces *"market data unavailable, showing
    user-entered values"* instead of crashing.
 4. **Adapter pattern for upgrade.** Each data source lives behind a small adapter
-   (`adapters/stocks/twelveData.ts`, `adapters/gold/metalsLive.ts`, etc.). Swapping to
-   a paid provider later is one file change — no card or agent rewrites.
+   (`adapters/stocks/twelveData.ts`, `adapters/gold/goldApi.ts`, etc.). Swapping a
+   provider is one file change — no card or agent rewrites. Proven in practice: the
+   metals.live → gold-api.com swap touched one adapter file and one cron import.
 
 ---
 
@@ -280,7 +283,11 @@ version-controlled as exported JSON in `n8n/workflows/` in this repo.
   cross-domain handoff to solve.
 - **Market data — all free tier for v1:**
   - Stocks → Twelve Data free (shared-cache architecture per §3.5a)
-  - Gold / jewelry → metals.live free + exchangerate.host
+  - Gold / jewelry → gold-api.com free spot + open.er-api.com FX (both keyless).
+    The original picks (metals.live, exchangerate.host) rotted before launch —
+    dead TLS endpoint and a new key wall respectively — and were replaced June
+    2026 through the §3.5a adapter seam. exchangerate.host still works if an
+    `EXCHANGERATE_ACCESS_KEY` is configured.
   - Autos → Syarah + Haraj scrape (polite scraping per §3.5a)
   - Real estate → REGA govt index primary + Aqar scrape secondary
 - All paid-upgrade decisions deferred until real usage data exists. The adapter pattern

@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS market_snapshot (
   price       REAL,
   currency    TEXT NOT NULL DEFAULT 'SAR',
   payload     TEXT,            -- JSON: provider-specific extras (ohlc, listing counts, …)
-  source      TEXT NOT NULL,   -- adapter id, e.g. 'twelve-data', 'metals-live'
+  source      TEXT NOT NULL,   -- adapter id, e.g. 'twelve-data', 'gold-api'
   fetched_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (asset_class, symbol)
 );

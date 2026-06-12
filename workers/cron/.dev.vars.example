@@ -15,5 +15,9 @@ SCRAPER_CONTACT="osooly.app"
 # (the cron always includes TASI plus symbols users hold).
 # STOCK_SYMBOLS="SPX,IXIC"
 
+# Optional: exchangerate.host access key for the USD->SAR rate. Without it
+# the gold job uses the keyless open.er-api.com daily feed (PRD §3.10).
+# EXCHANGERATE_ACCESS_KEY=""
+
 # Optional: override the REGA open-data dataset URL if the portal moves it.
 # REGA_INDEX_URL=""

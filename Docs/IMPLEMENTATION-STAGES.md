@@ -103,7 +103,7 @@ S1 scaffolding/shell
 ## S4 — Market data infrastructure
 
 - **Goal:** the `market_snapshot` shared-cache pattern; the four adapter modules
-  (Twelve Data, metals.live + exchangerate.host, Syarah+Haraj scraper, REGA+Aqar
+  (Twelve Data, gold-api.com + open.er-api.com, Syarah+Haraj scraper, REGA+Aqar
   scraper); Cloudflare Cron Workers per asset class with the cadences in PRD §3.6;
   graceful-degradation handling (last-known + stale badge) and polite-scraping
   rules per PRD §3.5a.
@@ -113,7 +113,7 @@ S1 scaffolding/shell
 - **Blocked by:** S2.
 - **Files touched (proposed):** `workers/cron/stocks.ts`, `workers/cron/gold.ts`,
   `workers/cron/autos.ts`, `workers/cron/realestate.ts`,
-  `lib/adapters/stocks/twelveData.ts`, `lib/adapters/gold/metalsLive.ts`,
+  `lib/adapters/stocks/twelveData.ts`, `lib/adapters/gold/goldApi.ts`,
   `lib/adapters/gold/exchangerate.ts`, `lib/adapters/autos/syarah.ts`,
   `lib/adapters/autos/haraj.ts`, `lib/adapters/realestate/rega.ts`,
   `lib/adapters/realestate/aqar.ts`, `lib/market-snapshot.ts`,
