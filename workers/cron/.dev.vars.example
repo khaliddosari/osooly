@@ -1,0 +1,19 @@
+# Local secrets for the cron worker (`wrangler dev --config
+# workers/cron/wrangler.toml`). Copy to .dev.vars (gitignored) and fill in.
+# Production values are set with `wrangler secret put <NAME> --config
+# workers/cron/wrangler.toml` (S10).
+
+# Twelve Data free-tier API key (https://twelvedata.com/) — stocks refresh
+# logs a clean failure without it; everything else runs fine.
+TWELVE_DATA_API_KEY=""
+
+# Contact surfaced in the scraper User-Agent: "Osooly/1.0 (+<this>)".
+# An email or URL someone can actually reach the operators at.
+SCRAPER_CONTACT="osooly.app"
+
+# Optional: extra comma-separated stock symbols to track platform-wide
+# (the cron always includes TASI plus symbols users hold).
+# STOCK_SYMBOLS="SPX,IXIC"
+
+# Optional: override the REGA open-data dataset URL if the portal moves it.
+# REGA_INDEX_URL=""
