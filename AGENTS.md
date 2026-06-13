@@ -70,8 +70,9 @@ beside the bullet — that's the binding version.**
   fields in D1; per-user monthly LLM token cap.
   → [PRD §3.9 Non-functional requirements](Docs/PRD.md#39-non-functional-requirements)
 - **Tech stack:** Next.js 15 + TypeScript + Tailwind / NextAuth (Google) /
-  Cloudflare D1 + Vectorize + Workers + Cron / LangChain + LangGraph / DeepSeek + Groq /
-  FastAPI sidecar (Namtheg) / n8n (notifications).
+  Cloudflare D1 + Vectorize + Workers + Cron / LangChain + LangGraph /
+  DeepSeek V4 Flash (OpenRouter, also the web-search fallback) + xAI Grok
+  (live X.com news search) / FastAPI sidecar (Namtheg) / n8n (notifications).
   → [PRD §3.8 Tech stack](Docs/PRD.md#38-tech-stack-locked-for-v1)
 
 ---

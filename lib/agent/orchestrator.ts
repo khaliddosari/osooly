@@ -6,8 +6,10 @@ import {
 } from "@/lib/recommendations";
 import { syncPortfolioCorpus } from "@/lib/rag/embed-portfolio";
 import { NullRagStore, type RagStore } from "@/lib/rag/vectorize";
+import type { AssetClass } from "@/lib/market-snapshot";
 import { draftRecommendation } from "./draft";
 import type { AgentEnv } from "./env";
+import { fetchLiveNews } from "./live-news";
 import {
   buildBoundModel,
   modelStamp,
@@ -63,6 +65,8 @@ export interface AgentRunDeps {
   rag?: RagStore;
   /** Test seam; production builds these from env via the router policy. */
   models?: AgentModels;
+  /** Test seam; production searches xAI Grok, then DeepSeek web search. */
+  liveNews?: (assetClass: AssetClass) => Promise<string[]>;
 }
 
 export interface AgentRunResult {
@@ -79,12 +83,15 @@ export async function runAgentForUser(
     triage: buildBoundModel("classification", deps.env ?? {}),
     reasoning: buildBoundModel("reasoning", deps.env ?? {}),
   };
+  const liveNews =
+    deps.liveNews ??
+    ((assetClass: AssetClass) => fetchLiveNews(assetClass, deps.env ?? {}));
 
   // One sub-agent node per asset class; a failing class degrades to fewer
   // drafts, never to a failed run.
   const classNode = (agent: SubAgent) => async () => {
     try {
-      return { drafts: await runSubAgent(agent, ctx, rag, models) };
+      return { drafts: await runSubAgent(agent, ctx, rag, models, liveNews) };
     } catch (error) {
       console.error(`[agent] ${agent.assetClass} sub-agent failed:`, error);
       return {};
@@ -135,8 +142,18 @@ async function runSubAgent(
   agent: SubAgent,
   ctx: CardServerContext,
   rag: RagStore,
-  models: AgentModels
+  models: AgentModels,
+  liveNews: (assetClass: AssetClass) => Promise<string[]>
 ): Promise<NewRecommendation[]> {
+  // One live search per class per run (PRD §3.6); a failed search degrades
+  // to RSS-corpus context only, never to a failed class.
+  let liveLines: string[] = [];
+  try {
+    liveLines = await liveNews(agent.assetClass);
+  } catch (error) {
+    console.error(`[agent] live news failed for ${agent.assetClass}:`, error);
+  }
+
   const drafts: NewRecommendation[] = [];
   for (const asset of await agent.gather(ctx)) {
     let ragContext: string[] = [];
@@ -154,9 +171,10 @@ async function runSubAgent(
           topK: 3,
         }),
       ]);
-      ragContext = [...portfolio, ...news];
+      ragContext = [...liveLines, ...portfolio, ...news];
     } catch (error) {
       console.error(`[agent] RAG query failed for ${asset.assetName}:`, error);
+      ragContext = [...liveLines];
     }
 
     const outcome = await draftRecommendation(

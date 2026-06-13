@@ -11,8 +11,9 @@
 **Osooly** (أصولي — "my assets") is an **agentic personal-finance assistant**. It tracks
 everything a user owns across asset classes — equities, real estate, automobiles,
 jewelry — keeps each class continuously enriched with relevant market data, and uses an
-LLM agent (DeepSeek + Groq via LangChain / LangGraph, RAG over the user's portfolio plus
-a market-news corpus) to recommend actions on those assets.
+LLM agent (DeepSeek V4 Flash via LangChain / LangGraph for the analysis; xAI Grok live
+X.com search for market news, with DeepSeek web search as the fallback; RAG over the
+user's portfolio plus a market-news corpus) to recommend actions on those assets.
 
 **Vision:** *a dashboard that thinks about your assets so you don't have to.*
 
@@ -166,9 +167,20 @@ v1 data sources are deliberately zero-cost, which forces four architectural rule
 
 - **Orchestrator:** LangGraph state machine with one supervisor node and one sub-agent
   per asset class. Each sub-agent owns the tools that come from its card's `agentTools`.
-- **Models:** **DeepSeek** (via DeepSeek direct API or OpenRouter) for reasoning-heavy
-  recommendation drafts; **Groq** (Llama-3.1-70B or similar) for fast classification /
-  summarization. Selection is policy-based (cheap-first, escalate on low confidence).
+- **Models:** **DeepSeek V4 Flash** (`deepseek/deepseek-v4-flash` via OpenRouter) does
+  all the heavy lifting: triage classification, summarization, and the full
+  recommendation drafts. The cheap-first policy survives as a token policy rather than
+  a provider split: a short triage call first, escalating to a longer draft call on
+  low confidence or any buy/sell.
+- **Live market-news search:** **xAI Grok** (`grok-4.3` on the xAI Responses API with
+  the server-side `x_search` agent tool) pulls the latest X.com posts per asset class
+  at run time; X search is exclusively Grok's job. When `XAI_API_KEY` is absent or the
+  call fails, the searcher falls back to **DeepSeek V4 Flash web search**: the same
+  OpenRouter key, chat completions with the `openrouter:web_search` server tool
+  (roughly $0.005 per search). When both are unavailable the run proceeds on the RSS
+  news corpus alone, per the degradation rules in §3.5a. Live-news lines are merged
+  into each draft brief alongside the RAG snippets, one search per asset class per run
+  to keep token and search spend bounded.
 - **RAG corpus:** two collections in a single Cloudflare Vectorize index
   (separated by a `corpus` metadata field):
   (a) the user's own asset ledger + transaction history (private per `user_id`),
@@ -226,7 +238,15 @@ proxy so cookies and CORS stay simple.
 - **Vector store:** Cloudflare Vectorize for the dual RAG corpora; embeddings via
   Workers AI `@cf/baai/bge-m3` (§3.6).
 - **Agentic layer:** LangChain + LangGraph; runs in a Cloudflare Worker (or Node.js
-  sidecar if Worker constraints bite). DeepSeek + Groq via their HTTPS APIs.
+  sidecar if Worker constraints bite). DeepSeek V4 Flash (via OpenRouter, which also
+  carries the web-search fallback) and xAI Grok (live X.com search) over HTTPS.
+- **AI Gateway:** LLM traffic routes through a Cloudflare AI Gateway when
+  `DEEPSEEK_BASE_URL` / `XAI_BASE_URL` point at it: response caching (the
+  deterministic per-class news searches are cached 30 min, making search spend
+  user-count-independent per §3.5a rule 1), per-provider spend analytics, and rate
+  limiting. Direct provider URLs stay the code defaults so local dev needs no
+  gateway. The gateway's grok provider does not yet pass the xAI Responses API
+  through, so xAI stays direct until it does.
 - **AutoML sidecar:** the ported Namtheg FastAPI service (§3.7) — shares D1, called by
   card agents and by the `/namtheg` route.
 - **Scheduling:** Cloudflare Cron Triggers per refresh job.

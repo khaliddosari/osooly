@@ -11,15 +11,22 @@ AUTH_SECRET=""
 AUTH_GOOGLE_ID=""
 AUTH_GOOGLE_SECRET=""
 
-# S6 agentic layer (PRD 3.6). Both keys are required for POST /api/agent/run;
-# without them the endpoint answers 503 and the cards just show no
-# recommendations. DeepSeek: https://platform.deepseek.com / Groq:
-# https://console.groq.com
+# S6 agentic layer (PRD 3.6). DEEPSEEK_API_KEY is required for POST
+# /api/agent/run (an OpenRouter key, https://openrouter.ai/keys; DeepSeek V4
+# Flash does all triage + drafting, plus the web-search fallback for live
+# news); without it the endpoint answers 503. XAI_API_KEY
+# (https://console.x.ai) enables the primary live X.com news search; without
+# it the searcher uses DeepSeek web search alone.
 DEEPSEEK_API_KEY=""
-GROQ_API_KEY=""
+XAI_API_KEY=""
 
 # Optional model overrides (defaults live in lib/agent/models/):
-#   DEEPSEEK_MODEL="deepseek-chat"
-#   GROQ_MODEL="llama-3.3-70b-versatile"
+#   DEEPSEEK_MODEL="deepseek/deepseek-v4-flash"
+#   XAI_MODEL="grok-4.3"
+# Optional Cloudflare AI Gateway routing (PRD 3.8): caching + analytics +
+# rate limiting. Leave unset to call the providers directly.
+#   DEEPSEEK_BASE_URL="https://gateway.ai.cloudflare.com/v1/{account_id}/osooly/openrouter/v1"
+#   XAI_BASE_URL is direct-only for now (the gateway grok provider lacks the
+#   Responses API needed for x_search).
 # Optional RSS override for the news RAG corpus (lib/rag/embed-news.ts):
 #   NEWS_FEEDS="stocks=https://example.com/rss,jewelry=https://example.com/gold.rss"

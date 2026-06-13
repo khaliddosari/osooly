@@ -150,7 +150,8 @@ S1 scaffolding/shell
 ## S6 — Agentic layer + RAG
 
 - **Goal:** LangGraph orchestrator with one supervisor + four sub-agents (one per
-  card's asset class); DeepSeek + Groq client with cheap-first / escalate routing;
+  card's asset class); DeepSeek V4 Flash client with cheap-first / escalate routing
+  and an xAI Grok live X.com news search (DeepSeek web search as fallback);
   Cloudflare Vectorize RAG over user portfolio + market-news corpora;
   `Recommendation` rows written to D1 and consumed by the cards' components.
 - **Why coupled:** the orchestrator, RAG retrieval, model routing, and the
@@ -160,15 +161,16 @@ S1 scaffolding/shell
   recommendations to render).
 - **Files touched (proposed):** `lib/agent/orchestrator.ts`,
   `lib/agent/supervisor.ts`, `lib/agent/sub-agents/<asset-class>.ts`,
-  `lib/agent/models/deepseek.ts`, `lib/agent/models/groq.ts`,
-  `lib/agent/models/router.ts`, `lib/rag/vectorize.ts`,
+  `lib/agent/models/deepseek.ts`, `lib/agent/models/xai.ts`,
+  `lib/agent/models/router.ts`, `lib/agent/live-news.ts`, `lib/rag/vectorize.ts`,
   `lib/rag/embed-portfolio.ts`, `lib/rag/embed-news.ts`,
   `workers/cron/news-refresh.ts`, `migrations/0003_recommendations.sql` (if not
   in S2).
 - **Acceptance:** running the orchestrator on a seeded portfolio produces a
   `Recommendation` row per asset with `reasoning`, `confidence`, and `model`
-  set; the model router picks Groq for classification and DeepSeek for
-  reasoning-heavy drafts; cards display the latest N recommendations.
+  set; the model router runs every task on DeepSeek V4 Flash (short triage,
+  escalate to the full draft) and routes live news to xAI Grok with DeepSeek
+  web search as fallback; cards display the latest N recommendations.
 
 ---
 

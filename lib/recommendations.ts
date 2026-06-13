@@ -23,7 +23,7 @@ export interface NewRecommendation {
   action: RecommendationAction;
   reasoning: string;
   confidence: number;
-  /** Provider-qualified model id, e.g. "groq/llama-3.3-70b-versatile". */
+  /** Provider-qualified model id, e.g. "deepseek/deepseek-v4-flash". */
   model: string;
 }
 

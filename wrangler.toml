@@ -12,7 +12,7 @@ binding = "DB"
 database_name = "osooly"
 # Placeholder so local commands work out of the box. For the real database run
 # `wrangler d1 create osooly` and paste the id it prints here (S10).
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "0666115c-f2a2-421e-9977-736210a342be"
 migrations_dir = "migrations"
 
 # RAG bindings for the S6 agentic layer (PRD 3.6). Commented out until deploy

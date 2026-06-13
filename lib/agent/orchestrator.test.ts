@@ -46,7 +46,7 @@ function scriptedModels(): AgentModels & {
 } {
   const reasoningCalls: string[] = [];
   const triage: BoundModel = {
-    choice: { provider: "groq", model: "groq-test" },
+    choice: { provider: "deepseek", model: "v4-flash-triage-test" },
     chat: {
       async invoke(messages) {
         const prompt = messages.map(([, text]) => text).join("\n");
@@ -57,7 +57,7 @@ function scriptedModels(): AgentModels & {
     },
   };
   const reasoning: BoundModel = {
-    choice: { provider: "deepseek", model: "deepseek-test" },
+    choice: { provider: "deepseek", model: "v4-flash-reason-test" },
     chat: {
       async invoke(messages) {
         reasoningCalls.push(messages.map(([, text]) => text).join("\n"));
@@ -108,23 +108,47 @@ describe("runAgentForUser", () => {
       expect(row.reasoning.length).toBeGreaterThan(10);
       expect(row.confidence).toBeGreaterThanOrEqual(0);
       expect(row.confidence).toBeLessThanOrEqual(1);
-      expect(row.model).toMatch(/^(groq|deepseek)\//);
+      expect(row.model).toMatch(/^deepseek\//);
     }
   });
 
-  it("stamps the cheap model on calm holdings and the reasoning model on escalations", async () => {
+  it("stamps the triage call on calm holdings and the full draft call on escalations", async () => {
     const db = seededDb();
     const models = scriptedModels();
 
     await runAgentForUser({ db, userId: USER, models });
 
     const byAsset = new Map(db.recommendations.map((r) => [r.asset_id, r]));
-    // The car triaged "sell", which always escalates to DeepSeek.
-    expect(byAsset.get("a1")?.model).toBe("deepseek/deepseek-test");
+    // The car triaged "sell", which always escalates to the full draft call.
+    expect(byAsset.get("a1")?.model).toBe("deepseek/v4-flash-reason-test");
     expect(byAsset.get("a1")?.action).toBe("sell");
     expect(models.reasoningCalls.length).toBeGreaterThanOrEqual(1);
-    // The stock triaged a confident hold and stayed on Groq.
-    expect(byAsset.get("s1")?.model).toBe("groq/groq-test");
+    // The stock triaged a confident hold and stayed on the short call.
+    expect(byAsset.get("s1")?.model).toBe("deepseek/v4-flash-triage-test");
+  });
+
+  it("merges live news lines into the draft brief", async () => {
+    const db = seededDb();
+    const models = scriptedModels();
+    const searched: string[] = [];
+
+    await runAgentForUser({
+      db,
+      userId: USER,
+      models,
+      liveNews: async (assetClass) => {
+        searched.push(assetClass);
+        return [`Live headline for ${assetClass}`];
+      },
+    });
+
+    // One search per planned class, and the escalated car draft saw its line.
+    expect(searched.sort()).toEqual(["autos", "jewelry", "real_estate", "stocks"]);
+    expect(
+      models.reasoningCalls.some((prompt) =>
+        prompt.includes("Live headline for autos")
+      )
+    ).toBe(true);
   });
 
   it("caps confidence for assets whose evidence includes stale readings", async () => {

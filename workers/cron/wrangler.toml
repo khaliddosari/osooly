@@ -44,5 +44,5 @@ binding = "DB"
 database_name = "osooly"
 # Same placeholder as the root wrangler.toml — replace both with the real id
 # from `wrangler d1 create osooly` at deploy time (S10).
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "0666115c-f2a2-421e-9977-736210a342be"
 migrations_dir = "../../migrations"

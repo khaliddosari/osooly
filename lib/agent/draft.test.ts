@@ -17,11 +17,11 @@ const BRIEF: AssetBrief = {
 };
 
 function fakeModel(
-  provider: "groq" | "deepseek",
+  model: string,
   replies: string[]
 ): BoundModel & { calls: number } {
   const bound = {
-    choice: { provider, model: `${provider}-test` },
+    choice: { provider: "deepseek" as const, model },
     calls: 0,
     chat: {
       async invoke() {
@@ -82,35 +82,35 @@ describe("capForStaleness (PRD 3.5a rule 2)", () => {
 
 describe("draftRecommendation (cheap-first, escalate on low confidence)", () => {
   it("lets a confident hold triage stand without escalating", async () => {
-    const triage = fakeModel("groq", [
+    const triage = fakeModel("triage-test", [
       '{"action":"hold","confidence":0.85,"reasoning":"Tracking the index."}',
     ]);
-    const reasoning = fakeModel("deepseek", ["unused"]);
+    const reasoning = fakeModel("reason-test", ["unused"]);
 
     const outcome = await draftRecommendation(BRIEF, { triage, reasoning });
     expect(outcome.escalated).toBe(false);
     expect(outcome.action).toBe("hold");
-    expect(outcome.modelChoice.provider).toBe("groq");
+    expect(outcome.modelChoice.model).toBe("triage-test");
     expect(reasoning.calls).toBe(0);
   });
 
   it("escalates buy/sell triages to the reasoning model", async () => {
-    const triage = fakeModel("groq", [
+    const triage = fakeModel("triage-test", [
       '{"action":"sell","confidence":0.9,"reasoning":"Down 20%."}',
     ]);
-    const reasoning = fakeModel("deepseek", [
+    const reasoning = fakeModel("reason-test", [
       '{"action":"sell","confidence":0.7,"reasoning":"Cost basis is underwater and the trend is negative."}',
     ]);
 
     const outcome = await draftRecommendation(BRIEF, { triage, reasoning });
     expect(outcome.escalated).toBe(true);
-    expect(outcome.modelChoice.provider).toBe("deepseek");
+    expect(outcome.modelChoice.model).toBe("reason-test");
     expect(reasoning.calls).toBe(1);
   });
 
   it("escalates when the cheap reply is unparseable", async () => {
-    const triage = fakeModel("groq", ["sorry, as a language model..."]);
-    const reasoning = fakeModel("deepseek", [
+    const triage = fakeModel("triage-test", ["sorry, as a language model..."]);
+    const reasoning = fakeModel("reason-test", [
       '{"action":"watch","confidence":0.5,"reasoning":"Mixed signals."}',
     ]);
 
@@ -120,8 +120,8 @@ describe("draftRecommendation (cheap-first, escalate on low confidence)", () => 
   });
 
   it("degrades to a labelled low-confidence watch when both models fail", async () => {
-    const triage = fakeModel("groq", ["garbage"]);
-    const reasoning = fakeModel("deepseek", ["also garbage"]);
+    const triage = fakeModel("triage-test", ["garbage"]);
+    const reasoning = fakeModel("reason-test", ["also garbage"]);
 
     const outcome = await draftRecommendation(BRIEF, { triage, reasoning });
     expect(outcome.action).toBe("watch");
@@ -130,10 +130,10 @@ describe("draftRecommendation (cheap-first, escalate on low confidence)", () => 
   });
 
   it("applies the staleness cap to whichever model answered", async () => {
-    const triage = fakeModel("groq", [
+    const triage = fakeModel("triage-test", [
       '{"action":"hold","confidence":0.95,"reasoning":"Looks fine."}',
     ]);
-    const reasoning = fakeModel("deepseek", ["unused"]);
+    const reasoning = fakeModel("reason-test", ["unused"]);
 
     const outcome = await draftRecommendation(
       { ...BRIEF, freshness: ["stale"] },

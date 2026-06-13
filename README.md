@@ -2,8 +2,9 @@
 
 An agentic personal-finance assistant. Osooly keeps a unified ledger of everything you
 own (stocks, real estate, automobiles, jewelry), continuously enriches each asset class
-with live market data, and uses an LLM agent (DeepSeek + Groq via LangChain / LangGraph,
-RAG over your portfolio + a market-news corpus) to recommend actions on your assets.
+with live market data, and uses an LLM agent (DeepSeek V4 Flash via LangChain /
+LangGraph, xAI Grok live X.com news search with a DeepSeek web-search fallback, RAG over
+your portfolio + a market-news corpus) to recommend actions on your assets.
 
 The product is a PC-first dashboard of user-composable cards over the
 [Liquid Glass](Docs/Liquid%20Glass-Portfolio%20Design%20System/README.md) dark / frosted

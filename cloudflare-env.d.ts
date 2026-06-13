@@ -14,9 +14,9 @@ interface CloudflareEnv {
   // (503 without them); the RAG bindings are optional everywhere because
   // local dev has no Vectorize simulator (lib/rag/vectorize.ts degrades).
   DEEPSEEK_API_KEY?: string;
-  GROQ_API_KEY?: string;
+  XAI_API_KEY?: string;
   DEEPSEEK_MODEL?: string;
-  GROQ_MODEL?: string;
+  XAI_MODEL?: string;
   AI?: Ai;
   VECTORIZE?: VectorizeIndex;
 }

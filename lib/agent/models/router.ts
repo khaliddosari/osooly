@@ -1,33 +1,53 @@
 import type { RecommendationAction } from "@/lib/recommendations";
 import type { AgentEnv } from "../env";
 import { deepseekModelId, makeDeepSeekChat } from "./deepseek";
-import { groqModelId, makeGroqChat } from "./groq";
+import { xaiModelId } from "./xai";
 
 /**
- * Policy-based model selection (PRD §3.6): Groq for fast classification and
- * summarization, DeepSeek for reasoning-heavy recommendation drafts.
- * Cheap-first: every asset is triaged on the classification model, and only
- * uncertain or action-suggesting triages escalate to the reasoning model
- * (shouldEscalate). The policy is pure so it is testable without keys.
+ * Policy-based model selection (PRD §3.6): DeepSeek V4 Flash does all the
+ * heavy lifting (classification, summarization, reasoning). Cheap-first
+ * survives as a token policy: every asset is triaged with a short call, and
+ * only uncertain or action-suggesting triages escalate to the full draft
+ * call (shouldEscalate). Live news search is a separate role: xAI Grok does
+ * the X.com search exclusively, with DeepSeek web search (the same
+ * OpenRouter key) as the fallback. The policy is pure so it is testable
+ * without keys.
  */
 
 export type AgentTask = "classification" | "summarization" | "reasoning";
 
 export interface ModelChoice {
-  provider: "groq" | "deepseek";
+  provider: "deepseek" | "xai";
   model: string;
 }
 
 export function pickModel(task: AgentTask, env: AgentEnv = {}): ModelChoice {
-  if (task === "reasoning") {
-    return { provider: "deepseek", model: deepseekModelId(env) };
-  }
-  return { provider: "groq", model: groqModelId(env) };
+  void task; // every task routes to the same provider under the V4 Flash policy
+  return { provider: "deepseek", model: deepseekModelId(env) };
 }
 
-/** The `model` column stamp for a Recommendation row (PRD §3.6). */
+/**
+ * The live market-news searcher (PRD §3.6): xAI Grok (X.com search) when
+ * its key is configured, DeepSeek web search otherwise, null when no key is
+ * available (the run then proceeds on the RSS news corpus alone).
+ */
+export function pickNewsSearcher(env: AgentEnv = {}): ModelChoice | null {
+  if (env.xaiApiKey) return { provider: "xai", model: xaiModelId(env) };
+  if (env.deepseekApiKey) {
+    return { provider: "deepseek", model: deepseekModelId(env) };
+  }
+  return null;
+}
+
+/**
+ * The `model` column stamp for a Recommendation row (PRD §3.6). OpenRouter
+ * slugs already lead with the provider (deepseek/deepseek-v4-flash), so the
+ * prefix is only added when missing.
+ */
 export function modelStamp(choice: ModelChoice): string {
-  return `${choice.provider}/${choice.model}`;
+  return choice.model.startsWith(`${choice.provider}/`)
+    ? choice.model
+    : `${choice.provider}/${choice.model}`;
 }
 
 /**
@@ -60,8 +80,5 @@ export interface BoundModel {
 }
 
 export function buildBoundModel(task: AgentTask, env: AgentEnv): BoundModel {
-  const choice = pickModel(task, env);
-  const chat =
-    choice.provider === "deepseek" ? makeDeepSeekChat(env) : makeGroqChat(env);
-  return { choice, chat };
+  return { choice: pickModel(task, env), chat: makeDeepSeekChat(env) };
 }
