@@ -26,10 +26,14 @@ recommending actions per asset class.
   (card system primitives: CardDefinition contract, layoutSolver, dnd-kit grid,
   Customize sheet, layout persistence), S4 (market data infra: market_snapshot
   shared cache, the four adapter families, the cron Worker in `workers/cron/`),
-  S5 (the four v1 market cards in `src/cards/`), and S6 (agentic layer: the
+  S5 (the four v1 market cards in `src/cards/`), S6 (agentic layer: the
   LangGraph supervisor + per-class sub-agents in `lib/agent/`, real agent tools
   in `src/agent/tools/`, Vectorize RAG in `lib/rag/`, recommendations rendered
-  in-card) shipped. S7+ (alerts, Namtheg port) pending;
+  in-card), and S7 (price alerts + notifications: the `alerts` CRUD in
+  `app/api/alerts/`, the `lib/alerts/` predicate model + D1 store, the
+  `alerts-evaluator` in `workers/cron/` firing matches to a single n8n webhook,
+  the per-card "Notify me when…" UI, and the committed `n8n/workflows/`
+  fan-out) shipped. S8+ (Namtheg port) pending;
   see [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
 - **Repo layout (current):**
   - `Docs/PRD.md` — the source of truth (this file's parent doc)
@@ -43,8 +47,12 @@ recommending actions per asset class.
   - `src/agent/tools/`: the per-asset-class agent tools the cards list in
     `agentTools` (S6); `lib/agent/` + `lib/rag/` hold the LangGraph orchestrator
     and the Vectorize RAG layer
-  - `workers/cron/`: the market-refresh + news-refresh Cron Worker (own
-    wrangler.toml, same D1)
+  - `lib/alerts/` + `app/api/alerts/`: the price-alert predicate model / D1
+    store and the per-user CRUD behind the cards' "Notify me when…" UI (S7)
+  - `workers/cron/`: the market-refresh + news-refresh Cron Worker plus the
+    `alerts-evaluator` (runs after each refresh, POSTs matches to n8n, and
+    exposes the `/alert-delivery` callback) (own wrangler.toml, same D1)
+  - `n8n/workflows/`: version-controlled n8n workflow JSON (S7 alert fan-out)
   - `migrations/` + `wrangler.toml` — D1 schema, applied via
     `wrangler d1 migrations apply osooly`
   - `Namtheg/AutoML/` — the sibling project being ported into Osooly (read-only)

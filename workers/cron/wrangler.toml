@@ -27,6 +27,13 @@ crons = [
   "30 23 * * *",    # news corpus (RSS -> Vectorize): nightly 02:30 AST
 ]
 
+# Price alerts (PRD 3.8a): after each refresh the scheduled handler evaluates
+# that class's alerts and POSTs matches to ALERTS_WEBHOOK_URL; the Worker's
+# fetch handler exposes POST /alert-delivery for n8n's confirmation callback.
+# ALERTS_WEBHOOK_URL / ALERTS_WEBHOOK_TOKEN are secrets (see .dev.vars.example),
+# set in prod with `wrangler secret put`. S10 adds the route that makes
+# /alert-delivery publicly reachable.
+
 # RAG bindings for the news refresh (PRD 3.6). Commented out until deploy
 # (S10): wrangler has no local Vectorize simulator, and the index must first
 # be created per the setup commands in lib/rag/vectorize.ts. The job logs a

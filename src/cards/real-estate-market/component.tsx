@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertRuleForm, type AlertTarget } from "@/components/alert-rule-form";
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
 import { RecommendationList } from "@/components/recommendation-list";
 import type { CardProps } from "@/lib/cards/types";
@@ -26,7 +27,25 @@ export function RealEstateMarketCard({ data }: CardProps) {
       <CityTrends cities={market.cities} />
       <Properties properties={market.properties} />
       <RecommendationList recommendations={market.recommendations} />
+      <AlertRuleForm cardId="real-estate-market" targets={alertTargets(market)} />
     </div>
+  );
+}
+
+/** Watch the official REGA transaction index of each tracked city. */
+function alertTargets(market: RealEstateMarketData): AlertTarget[] {
+  return market.cities.flatMap((cityMarket) =>
+    cityMarket.index
+      ? [
+          {
+            key: cityMarket.slug,
+            label: cityMarket.city,
+            assetClass: "real_estate" as const,
+            symbol: cityMarket.index.symbol,
+            currency: cityMarket.index.currency,
+          },
+        ]
+      : []
   );
 }
 

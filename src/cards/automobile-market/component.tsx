@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertRuleForm, type AlertTarget } from "@/components/alert-rule-form";
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
 import { Icon } from "@/components/icon";
 import { RecommendationList } from "@/components/recommendation-list";
@@ -43,15 +44,37 @@ export function AutomobileMarketCard({ data }: CardProps) {
         ))}
       </ul>
       <RecommendationList recommendations={market.recommendations} />
+      <AlertRuleForm cardId="automobile-market" targets={alertTargets(market)} />
     </div>
   );
 }
 
+/** Watch the dealer (Syarah) median of every vehicle that has been scraped. */
+function alertTargets(market: AutoMarketData): AlertTarget[] {
+  return market.vehicles.flatMap((vehicle) =>
+    vehicle.dealer
+      ? [
+          {
+            key: vehicle.dealer.symbol,
+            label: vehicleTitle(vehicle),
+            assetClass: "autos" as const,
+            symbol: vehicle.dealer.symbol,
+            assetId: vehicle.assetId,
+            currency: vehicle.dealer.currency,
+          },
+        ]
+      : []
+  );
+}
+
+function vehicleTitle(vehicle: VehicleValuation): string {
+  return vehicle.make && vehicle.model
+    ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ")
+    : vehicle.name;
+}
+
 function VehicleRow({ vehicle }: { vehicle: VehicleValuation }) {
-  const title =
-    vehicle.make && vehicle.model
-      ? [vehicle.year, vehicle.make, vehicle.model].filter(Boolean).join(" ")
-      : vehicle.name;
+  const title = vehicleTitle(vehicle);
   const drift =
     vehicle.estimateSar !== null && vehicle.purchasePrice
       ? ((vehicle.estimateSar - vehicle.purchasePrice) /

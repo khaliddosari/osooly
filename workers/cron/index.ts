@@ -1,5 +1,7 @@
+import { evaluateAlerts, handleAlertDelivery } from "./alerts-evaluator";
 import { refreshAutos } from "./autos";
 import {
+  CRON_ASSET_CLASS,
   CRON_AUTOS,
   CRON_GOLD,
   CRON_NEWS,
@@ -31,6 +33,11 @@ import { refreshStocks } from "./stocks";
  * A failed refresh logs and exits cleanly — last-known market_snapshot rows
  * stay put and age into the stale badge (PRD §3.5a rule 2). Throwing here
  * would only make Cloudflare retry into the same outage.
+ *
+ * After each market refresh the same handler re-evaluates that class's price
+ * alerts (PRD §3.8a) so an alert fires within one cron cycle of the move that
+ * tripped it. The Worker also exposes a `fetch` handler for the n8n delivery
+ * callback (POST /alert-delivery).
  */
 
 const JOBS: Record<string, (env: CronEnv) => Promise<void>> = {
@@ -74,5 +81,30 @@ export default {
         })
       );
     }
+
+    // Evaluate this class's alerts against the rows we just refreshed, in its
+    // own try/catch so an alert outage never masks a successful refresh.
+    const assetClass = CRON_ASSET_CLASS[controller.cron];
+    if (assetClass) {
+      try {
+        await evaluateAlerts(env, assetClass);
+      } catch (error) {
+        console.error(
+          JSON.stringify({
+            event: "alerts.failed",
+            cron: controller.cron,
+            error: error instanceof Error ? error.message : String(error),
+          })
+        );
+      }
+    }
+  },
+
+  async fetch(request: Request, env: CronEnv): Promise<Response> {
+    const { pathname } = new URL(request.url);
+    if (pathname === "/alert-delivery") {
+      return handleAlertDelivery(request, env);
+    }
+    return new Response("Not found", { status: 404 });
   },
 };

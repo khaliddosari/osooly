@@ -1,0 +1,185 @@
+{
+  "name": "Osooly alert fan-out",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "osooly-alert",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "0d6c2b18-3f4a-4d3a-9e21-1c4b5a6d7e80",
+      "name": "Osooly Alert Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-260, 300],
+      "webhookId": "osooly-alert"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build EN + AR copy and per-channel flags from the evaluator payload\n// (workers/cron/alerts-evaluator.ts). The Worker POSTs the body under $json.body.\nconst a = $input.first().json.body || $input.first().json;\nconst channels = Array.isArray(a.channels) ? a.channels : [];\nconst asset = a.asset || {};\nconst value = `${a.value} ${a.currency || ''}`.trim();\nconst messageEn = `${asset.name}: ${a.summary}. Now ${value}.`;\nconst messageAr = `${asset.name}: تنبيه سعر. القيمة الآن ${value}.`;\nreturn [{\n  json: {\n    alertId: a.alertId,\n    to: a.user || {},\n    channels,\n    messageEn,\n    messageAr,\n    triggered_at: a.triggered_at,\n    wantsEmail: channels.includes('email'),\n    wantsWhatsapp: channels.includes('whatsapp'),\n    wantsTelegram: channels.includes('telegram'),\n  },\n}];"
+      },
+      "id": "1a2b3c4d-5e6f-4071-8a90-b1c2d3e4f501",
+      "name": "Prepare Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-40, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "cond-email",
+              "leftValue": "={{ $json.wantsEmail }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2b3c4d5e-6f70-4182-9b01-c2d3e4f5a612",
+      "name": "Wants Email?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [220, 80]
+    },
+    {
+      "parameters": {
+        "fromEmail": "alerts@osooly.app",
+        "toEmail": "={{ $json.to.email }}",
+        "subject": "Osooly price alert",
+        "emailFormat": "text",
+        "text": "={{ $json.messageEn }}\n\n{{ $json.messageAr }}",
+        "options": {}
+      },
+      "id": "3c4d5e6f-7081-4293-ac12-d3e4f5a6b723",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [460, 80],
+      "credentials": { "smtp": { "id": "REPLACE_SMTP_CREDENTIAL_ID", "name": "Osooly SMTP" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "cond-whatsapp",
+              "leftValue": "={{ $json.wantsWhatsapp }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4d5e6f70-8192-43a4-bd23-e4f5a6b7c834",
+      "name": "Wants WhatsApp?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "from": "whatsapp:+10000000000",
+        "to": "=whatsapp:{{ $json.to.phone }}",
+        "message": "={{ $json.messageEn }}",
+        "options": {}
+      },
+      "id": "5e6f7081-92a3-44b5-ce34-f5a6b7c8d945",
+      "name": "Send WhatsApp",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "credentials": { "twilioApi": { "id": "REPLACE_TWILIO_CREDENTIAL_ID", "name": "Osooly Twilio" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "cond-telegram",
+              "leftValue": "={{ $json.wantsTelegram }}",
+              "rightValue": "",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6f708192-a3b4-45c6-df45-a6b7c8d9e056",
+      "name": "Wants Telegram?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [220, 520]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.to.telegram }}",
+        "text": "={{ $json.messageEn }}",
+        "additionalFields": {}
+      },
+      "id": "70819203-b4c5-46d7-ea56-b7c8d9e0f167",
+      "name": "Send Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [460, 520],
+      "credentials": { "telegramApi": { "id": "REPLACE_TELEGRAM_CREDENTIAL_ID", "name": "Osooly Telegram" } }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OSOOLY_CALLBACK_URL }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $env.OSOOLY_CALLBACK_TOKEN }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ alertId: $json.alertId, channels: $json.channels, delivered_at: $now.toISO() }) }}",
+        "options": {}
+      },
+      "id": "8192a3b4-c5d6-47e8-fb67-c8d9e0f17288",
+      "name": "Confirm Delivery",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 740]
+    }
+  ],
+  "connections": {
+    "Osooly Alert Webhook": {
+      "main": [[{ "node": "Prepare Message", "type": "main", "index": 0 }]]
+    },
+    "Prepare Message": {
+      "main": [[
+        { "node": "Wants Email?", "type": "main", "index": 0 },
+        { "node": "Wants WhatsApp?", "type": "main", "index": 0 },
+        { "node": "Wants Telegram?", "type": "main", "index": 0 },
+        { "node": "Confirm Delivery", "type": "main", "index": 0 }
+      ]]
+    },
+    "Wants Email?": {
+      "main": [[{ "node": "Send Email", "type": "main", "index": 0 }], []]
+    },
+    "Wants WhatsApp?": {
+      "main": [[{ "node": "Send WhatsApp", "type": "main", "index": 0 }], []]
+    },
+    "Wants Telegram?": {
+      "main": [[{ "node": "Send Telegram", "type": "main", "index": 0 }], []]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "tags": ["osooly"]
+}

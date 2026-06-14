@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertRuleForm, type AlertTarget } from "@/components/alert-rule-form";
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
 import { Icon } from "@/components/icon";
 import { RecommendationList } from "@/components/recommendation-list";
@@ -23,8 +24,38 @@ export function StockMarketCard({ data }: CardProps) {
       <IndexHeadline index={market.index} />
       <HoldingsList holdings={market.holdings} />
       <RecommendationList recommendations={market.recommendations} />
+      <AlertRuleForm cardId="stock-market" targets={alertTargets(market)} />
     </div>
   );
+}
+
+/** Watch the index plus every distinct held ticker (PRD §3.8a). */
+function alertTargets(market: StockMarketData): AlertTarget[] {
+  const bySymbol = new Map<string, AlertTarget>([
+    [
+      "TASI",
+      {
+        key: "TASI",
+        label: "TASI index",
+        assetClass: "stocks",
+        symbol: "TASI",
+        currency: market.index?.currency ?? "SAR",
+      },
+    ],
+  ]);
+  for (const holding of market.holdings) {
+    if (holding.symbol && !bySymbol.has(holding.symbol)) {
+      bySymbol.set(holding.symbol, {
+        key: holding.symbol,
+        label: holding.symbol,
+        assetClass: "stocks",
+        symbol: holding.symbol,
+        assetId: holding.assetId,
+        currency: holding.snapshot?.currency ?? "SAR",
+      });
+    }
+  }
+  return [...bySymbol.values()];
 }
 
 function IndexHeadline({ index }: { index: StockMarketData["index"] }) {

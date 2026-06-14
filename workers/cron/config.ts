@@ -4,6 +4,8 @@
  * strings there crashes the runtime at startup.
  */
 
+import type { AssetClass } from "../../lib/market-snapshot";
+
 export interface CronEnv {
   DB: D1Database;
   /**
@@ -27,6 +29,14 @@ export interface CronEnv {
   EXCHANGERATE_ACCESS_KEY?: string;
   /** Override for the REGA open-data dataset URL. */
   REGA_INDEX_URL?: string;
+  /**
+   * Price-alert delivery (PRD §3.8a). The single n8n webhook the evaluator
+   * POSTs matches to (`https://<n8n-host>/webhook/osooly-alert`); without it
+   * the evaluator logs a clean skip. ALERTS_WEBHOOK_TOKEN is the shared bearer
+   * secret on both the outbound POST and the inbound delivery callback.
+   */
+  ALERTS_WEBHOOK_URL?: string;
+  ALERTS_WEBHOOK_TOKEN?: string;
 }
 
 /** Must match workers/cron/wrangler.toml [triggers] byte-for-byte. */
@@ -35,3 +45,15 @@ export const CRON_GOLD = "0 22 * * *";
 export const CRON_AUTOS = "30 22 * * *";
 export const CRON_REAL_ESTATE = "0 23 * * *";
 export const CRON_NEWS = "30 23 * * *";
+
+/**
+ * Which asset class a refresh cron feeds, so the scheduled handler can run the
+ * alerts evaluator on the same cadence (PRD §3.8a step 2). The news cron has
+ * no class and so fires no alerts.
+ */
+export const CRON_ASSET_CLASS: Record<string, AssetClass> = {
+  [CRON_STOCKS]: "stocks",
+  [CRON_GOLD]: "jewelry",
+  [CRON_AUTOS]: "autos",
+  [CRON_REAL_ESTATE]: "real_estate",
+};

@@ -55,9 +55,30 @@ export interface FakeRecommendation {
   created_at?: string;
 }
 
+export interface FakeUser {
+  id: string;
+  email?: string | null;
+  name?: string | null;
+}
+
+export interface FakeAlert {
+  id: string;
+  user_id: string;
+  card_id: string;
+  asset_id?: string | null;
+  /** Stored as a JSON string in D1; pass the object, the fake serialises it. */
+  predicate: Record<string, unknown>;
+  channels?: string[];
+  enabled?: 0 | 1;
+  created_at?: string;
+  last_fired_at?: string | null;
+}
+
 export interface FakeDbWithStores extends D1Database {
   /** Rows written through INSERT INTO recommendations, oldest first. */
   readonly recommendations: FakeRecommendation[];
+  /** Live alert rows; the evaluator mutates last_fired_at in place. */
+  readonly alerts: FakeAlert[];
 }
 
 export function fakeDb(rows: {
@@ -65,11 +86,21 @@ export function fakeDb(rows: {
   assets?: FakeAsset[];
   transactions?: FakeTransaction[];
   recommendations?: FakeRecommendation[];
+  alerts?: FakeAlert[];
+  users?: FakeUser[];
 }): FakeDbWithStores {
   const snapshots = rows.snapshots ?? [];
   const assets = rows.assets ?? [];
   const transactions = rows.transactions ?? [];
   const recommendations = [...(rows.recommendations ?? [])];
+  const alerts = (rows.alerts ?? []).map((a) => ({
+    channels: [],
+    enabled: 1 as 0 | 1,
+    asset_id: null,
+    last_fired_at: null,
+    ...a,
+  }));
+  const users = rows.users ?? [];
 
   function fullAsset(a: FakeAsset) {
     return {
@@ -85,6 +116,48 @@ export function fakeDb(rows: {
   }
 
   function route(sql: string, args: unknown[]): unknown[] {
+    if (sql.includes("FROM alerts")) {
+      const nameById = new Map(assets.map((a) => [a.id, a.name]));
+      if (sql.includes("json_extract")) {
+        // listFiringAlerts: enabled rows whose predicate watches this class.
+        const userById = new Map(users.map((u) => [u.id, u]));
+        return alerts
+          .filter(
+            (a) =>
+              a.enabled === 1 &&
+              (a.predicate as { assetClass?: string }).assetClass === args[0]
+          )
+          .map((a) => ({
+            id: a.id,
+            user_id: a.user_id,
+            card_id: a.card_id,
+            asset_id: a.asset_id ?? null,
+            asset_name: (a.asset_id && nameById.get(a.asset_id)) ?? null,
+            user_email: userById.get(a.user_id)?.email ?? null,
+            user_name: userById.get(a.user_id)?.name ?? null,
+            predicate: JSON.stringify(a.predicate),
+            channels: JSON.stringify(a.channels ?? []),
+            last_fired_at: a.last_fired_at ?? null,
+          }));
+      }
+      // listAlertsForUser: optionally scoped to one card.
+      const [userId, cardId] = args as [string, string?];
+      return alerts
+        .filter(
+          (a) => a.user_id === userId && (cardId === undefined || a.card_id === cardId)
+        )
+        .map((a) => ({
+          id: a.id,
+          card_id: a.card_id,
+          asset_id: a.asset_id ?? null,
+          asset_name: (a.asset_id && nameById.get(a.asset_id)) ?? null,
+          predicate: JSON.stringify(a.predicate),
+          channels: JSON.stringify(a.channels ?? []),
+          enabled: a.enabled ?? 1,
+          created_at: a.created_at ?? hoursAgoUtc(0),
+          last_fired_at: a.last_fired_at ?? null,
+        }));
+    }
     if (sql.includes("FROM market_snapshot")) {
       const wanted = sql.includes("symbol IN")
         ? new Set(args.slice(1) as string[])
@@ -188,11 +261,52 @@ export function fakeDb(rows: {
       });
       return [];
     }
+    if (sql.startsWith("UPDATE alerts SET last_fired_at")) {
+      const [id, firedAt] = args as [string, string];
+      const row = alerts.find((a) => a.id === id);
+      if (row) row.last_fired_at = firedAt;
+      return [];
+    }
+    if (sql.startsWith("UPDATE alerts SET enabled")) {
+      const [id, userId, enabled] = args as [string, string, number];
+      const row = alerts.find((a) => a.id === id && a.user_id === userId);
+      if (row) row.enabled = enabled ? 1 : 0;
+      return [];
+    }
+    if (sql.startsWith("DELETE FROM alerts")) {
+      const [id, userId] = args as [string, string];
+      const idx = alerts.findIndex((a) => a.id === id && a.user_id === userId);
+      if (idx >= 0) alerts.splice(idx, 1);
+      return [];
+    }
+    if (sql.startsWith("INSERT INTO alerts")) {
+      const [id, user_id, card_id, asset_id, predicate, channels] = args as [
+        string,
+        string,
+        string,
+        string | null,
+        string,
+        string,
+      ];
+      alerts.push({
+        id,
+        user_id,
+        card_id,
+        asset_id,
+        predicate: JSON.parse(predicate),
+        channels: JSON.parse(channels),
+        enabled: 1,
+        created_at: hoursAgoUtc(0),
+        last_fired_at: null,
+      });
+      return [];
+    }
     return route(sql, args);
   }
 
   const db = {
     recommendations,
+    alerts,
     prepare: (sql: string) => ({
       bind: (...args: unknown[]) => ({
         all: async <T>() => ({ results: execute(sql, args) as T[] }),

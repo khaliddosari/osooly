@@ -21,3 +21,10 @@ SCRAPER_CONTACT="osooly.app"
 
 # Optional: override the REGA open-data dataset URL if the portal moves it.
 # REGA_INDEX_URL=""
+
+# Price alerts (PRD 3.8a). The single n8n webhook the evaluator POSTs matches
+# to; without it the evaluator logs a clean skip and fires nothing. The token
+# is the shared bearer secret on both the outbound POST and the inbound
+# delivery callback (POST /alert-delivery) that n8n hits to confirm delivery.
+# ALERTS_WEBHOOK_URL="https://n8n.example.com/webhook/osooly-alert"
+# ALERTS_WEBHOOK_TOKEN=""

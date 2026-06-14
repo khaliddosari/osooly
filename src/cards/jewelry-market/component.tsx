@@ -1,11 +1,12 @@
 "use client";
 
+import { AlertRuleForm, type AlertTarget } from "@/components/alert-rule-form";
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
 import { RecommendationList } from "@/components/recommendation-list";
 import type { CardProps } from "@/lib/cards/types";
 import { asNumber, formatMoney } from "@/lib/format";
 import { usableReading } from "@/lib/market-snapshot";
-import type { JewelryMarketData } from "./fetcher";
+import { GOLD_SYMBOL, type JewelryMarketData } from "./fetcher";
 
 /**
  * Jewelry Market card (PRD §3.5): SAR/gram gold spot headline plus the
@@ -17,11 +18,22 @@ export function JewelryMarketCard({ data }: CardProps) {
   const market = data as JewelryMarketData | undefined;
   if (!market) return <CardDataFallback />;
 
+  const targets: AlertTarget[] = [
+    {
+      key: GOLD_SYMBOL,
+      label: "Gold spot (SAR/g)",
+      assetClass: "jewelry",
+      symbol: GOLD_SYMBOL,
+      currency: market.spot?.currency ?? "SAR",
+    },
+  ];
+
   return (
     <div className="flex h-full flex-col gap-5">
       <SpotHeadline spot={market.spot} />
       <Inventory market={market} />
       <RecommendationList recommendations={market.recommendations} />
+      <AlertRuleForm cardId="jewelry-market" targets={targets} />
     </div>
   );
 }

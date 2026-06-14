@@ -3,6 +3,7 @@ import { agentEnvFromBindings, missingProviderKeys } from "@/lib/agent/env";
 import { runAgentForUser } from "@/lib/agent/orchestrator";
 import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { isSameOriginRequest } from "@/lib/http/same-origin";
 import { makeRagStore } from "@/lib/rag/vectorize";
 
 /**
@@ -61,29 +62,5 @@ export async function POST(request: Request): Promise<Response> {
       { error: "The analyst run failed; nothing was written." },
       { status: 500 }
     );
-  }
-}
-
-/**
- * Same-origin guard (CSRF defense). Modern browsers stamp every request with
- * `Sec-Fetch-Site`; we trust it when present and only allow `same-origin`
- * (the dashboard's own fetch) or `none` (a direct, non-cross-site load, which
- * cannot be a forged POST). When the header is absent (older clients), we fall
- * back to comparing the `Origin` host against `Host`. A POST with neither
- * header is treated as suspicious and rejected.
- */
-function isSameOriginRequest(request: Request): boolean {
-  const secFetchSite = request.headers.get("sec-fetch-site");
-  if (secFetchSite !== null) {
-    return secFetchSite === "same-origin" || secFetchSite === "none";
-  }
-
-  const origin = request.headers.get("origin");
-  const host = request.headers.get("host");
-  if (origin === null || host === null) return false;
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
   }
 }

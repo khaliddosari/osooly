@@ -54,6 +54,10 @@ const MAP = {
   delete: "fa-trash",
   download: "fa-download",
 
+  // alerts / notifications
+  notifications: "fa-bell",
+  notifications_off: "fa-bell-slash",
+
   // status
   check_circle: "fa-circle-check",
   cloud_done: "fa-circle-check",

@@ -18,13 +18,25 @@ for the architecture.
 
 | File | Triggered by | What it does |
 |---|---|---|
-| `osooly-alert-fanout.json` | Webhook `/webhook/osooly-alert` from `alerts-evaluator` Cron Worker | Branches per channel (email / WhatsApp / Telegram / web-push), formats the message (EN/AR), applies user rate-limits, posts delivery confirmation back to Osooly. |
+| `osooly-alert-fanout.json` | Webhook `/webhook/osooly-alert` from the `alerts-evaluator` Cron Worker | Branches per channel (email / WhatsApp / Telegram; web-push is a placeholder), formats the message (EN/AR), and POSTs a delivery confirmation back to Osooly. |
 
-*(Folder is empty in v1 spec — workflows are authored during the v1 build phase, then
-exported here.)*
+## Contract with the Worker
+
+The evaluator (`workers/cron/alerts-evaluator.ts`) POSTs one match per fire to
+`/webhook/osooly-alert` with `Authorization: Bearer <ALERTS_WEBHOOK_TOKEN>` and a body of
+`{ alertId, user, asset, predicate, channels, summary, value, currency, triggered_at }`.
+
+After fanning out, the workflow's **Confirm Delivery** node POSTs back to the Worker's
+`/alert-delivery` endpoint so Osooly records `last_fired_at`. That node reads two n8n
+**environment variables** (set on the n8n instance, not in this repo):
+
+- `OSOOLY_CALLBACK_URL` — the Worker's `…/alert-delivery` URL.
+- `OSOOLY_CALLBACK_TOKEN` — must equal the Worker's `ALERTS_WEBHOOK_TOKEN`; sent as the
+  callback's `Authorization: Bearer` header.
 
 ## Secrets
 
 n8n credentials (SMTP, Twilio, Telegram bot token, etc.) live in the n8n instance's
-credential store — **not** in this repo. The workflow JSON references credentials by ID;
-re-imports require re-attaching them on the target instance.
+credential store, **not** in this repo. The committed workflow references them by
+placeholder ID (`REPLACE_*_CREDENTIAL_ID`); re-imports require attaching real credentials
+on the target instance.
