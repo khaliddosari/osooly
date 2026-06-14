@@ -40,7 +40,7 @@ export async function fetchStockQuotes(options: {
     throw new AdapterError(TWELVE_DATA_ADAPTER_ID, "missing TWELVE_DATA_API_KEY");
   }
 
-  const url = `${BASE_URL}?symbol=${encodeURIComponent(symbols.join(","))}&apikey=${apiKey}`;
+  const url = `${BASE_URL}?symbol=${encodeURIComponent(symbols.join(","))}&apikey=${encodeURIComponent(apiKey)}`;
   const res = await fetchImpl(url);
   if (!res.ok) {
     throw new AdapterError(TWELVE_DATA_ADAPTER_ID, `HTTP ${res.status}`);
