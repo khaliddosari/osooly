@@ -33,7 +33,10 @@ recommending actions per asset class.
   `app/api/alerts/`, the `lib/alerts/` predicate model + D1 store, the
   `alerts-evaluator` in `workers/cron/` firing matches to a single n8n webhook,
   the per-card "Notify me when…" UI, and the committed `n8n/workflows/`
-  fan-out) shipped. S8+ (Namtheg port) pending;
+  fan-out), and S8 (Namtheg port: the FastAPI sidecar in `sidecar/` with
+  D1-backed run storage + the NextAuth session bridge, the `/namtheg`
+  upload→preview→running→result→inference flow behind the `/api/namtheg`
+  proxy, and the cross-class `run_automl` agent tool) shipped. S9+ pending;
   see [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
 - **Repo layout (current):**
   - `Docs/PRD.md` — the source of truth (this file's parent doc)
@@ -53,9 +56,15 @@ recommending actions per asset class.
     `alerts-evaluator` (runs after each refresh, POSTs matches to n8n, and
     exposes the `/alert-delivery` callback) (own wrangler.toml, same D1)
   - `n8n/workflows/`: version-controlled n8n workflow JSON (S7 alert fan-out)
+  - `sidecar/`: the ported Namtheg AutoML pipeline as a FastAPI service (S8,
+    PRD §3.7); run state/results in D1 (`storage_d1.py`), NextAuth session
+    bridge (`auth_bridge.py`), in-process inference. Consumed through the
+    `app/api/namtheg/` proxy by the `/namtheg` pages (`components/namtheg/`,
+    `lib/namtheg/`) and by the `run_automl` tool in `src/agent/tools/automl/`
   - `migrations/` + `wrangler.toml` — D1 schema, applied via
     `wrangler d1 migrations apply osooly`
-  - `Namtheg/AutoML/` — the sibling project being ported into Osooly (read-only)
+  - `Namtheg/AutoML/` — the sibling project ported into Osooly in S8 (kept
+    read-only as the upstream reference)
 - **Canonical version of this block:** [PRD §3.1 Product overview](Docs/PRD.md#31-product-overview)
 
 ---
@@ -201,9 +210,10 @@ commas, parentheses, colons, or separate sentences instead.
 
 ## 5. Related projects
 
-- **Namtheg AutoML** — sibling product, being **ported** into Osooly per
-  [PRD §3.7](Docs/PRD.md#37-namtheg-tab--integration-approach). Surface at
-  `/namtheg`. Source: [`Namtheg/AutoML/`](Namtheg/AutoML/) ·
+- **Namtheg AutoML** — sibling product, **ported** into Osooly in S8 per
+  [PRD §3.7](Docs/PRD.md#37-namtheg-tab--integration-approach): pipeline in
+  [`sidecar/`](sidecar/), surface at `/namtheg`. Upstream source (read-only
+  reference): [`Namtheg/AutoML/`](Namtheg/AutoML/) ·
   GitHub: https://github.com/khaliddosari/AutoML · Live:
   https://namtheg.onrender.com
 - **Liquid Glass design system** — visual source of truth.

@@ -5,8 +5,8 @@ import { summarizeReading, type ReadingSummary, type ToolImpl } from "../types";
 /**
  * Real-estate tools (PRD §3.6): the real-estate sub-agent's read surface
  * over the nightly REGA transaction index + Aqar comparables in the shared
- * cache. The AutoML-backed valuation flow (run_automl, PRD §3.7) arrives
- * with S8.
+ * cache. The AutoML-backed projection lives in src/agent/tools/automl/
+ * (run_automl, PRD §3.7) since S8.
  */
 
 /** Aqar rows share the city slug with REGA rows, suffixed per source. */

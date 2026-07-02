@@ -19,4 +19,11 @@ interface CloudflareEnv {
   XAI_MODEL?: string;
   AI?: Ai;
   VECTORIZE?: VectorizeIndex;
+
+  // S8 Namtheg sidecar (PRD §3.7). The URL feeds the /api/namtheg proxy
+  // (defaults to http://localhost:8000 for dev); the token authenticates
+  // the run_automl agent tool's server-to-server calls and must match the
+  // sidecar's NAMTHEG_INTERNAL_TOKEN.
+  NAMTHEG_SIDECAR_URL?: string;
+  NAMTHEG_INTERNAL_TOKEN?: string;
 }

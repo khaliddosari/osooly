@@ -196,6 +196,28 @@ export function fakeDb(rows: {
         }));
     }
     if (sql.includes("FROM transactions")) {
+      if (sql.includes("JOIN assets")) {
+        // run_automl's ledger export: transactions joined to their asset,
+        // scoped to (user, class), oldest first.
+        const assetById = new Map(assets.map((a) => [a.id, fullAsset(a)]));
+        return transactions
+          .filter((t) => t.user_id === args[0])
+          .map((t) => ({ t, a: assetById.get(t.asset_id) }))
+          .filter((pair): pair is { t: FakeTransaction; a: ReturnType<typeof fullAsset> } =>
+            Boolean(pair.a && pair.a.asset_class === args[1])
+          )
+          .sort((x, y) => x.t.occurred_at.localeCompare(y.t.occurred_at))
+          .map(({ t, a }) => ({
+            asset_name: a.name,
+            symbol: a.symbol,
+            kind: t.kind,
+            quantity: t.quantity,
+            price: t.price ?? null,
+            currency: t.currency ?? "SAR",
+            occurred_at: t.occurred_at,
+            purchase_price: a.purchase_price,
+          }));
+      }
       return transactions
         .filter((t) => t.user_id === args[0])
         .map((t) => ({ price: null, currency: "SAR", ...t }))

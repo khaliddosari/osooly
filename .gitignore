@@ -45,6 +45,8 @@ wrangler.toml.bak
 *.db-journal
 
 # ─── Python (Namtheg FastAPI sidecar) ──────────────────────────────────────────
+# Per-run scratch disk (datasets, model bundles) — compute inputs, never tracked.
+sidecar/storage/
 __pycache__/
 *.py[cod]
 *$py.class

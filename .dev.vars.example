@@ -30,3 +30,12 @@ XAI_API_KEY=""
 #   Responses API needed for x_search).
 # Optional RSS override for the news RAG corpus (lib/rag/embed-news.ts):
 #   NEWS_FEEDS="stocks=https://example.com/rss,jewelry=https://example.com/gold.rss"
+
+# S8 Namtheg sidecar (PRD 3.7). NAMTHEG_SIDECAR_URL points the /api/namtheg
+# proxy and the run_automl agent tool at the FastAPI service (defaults to
+# http://localhost:8000; see sidecar/README.md to run it locally).
+# NAMTHEG_INTERNAL_TOKEN is the shared secret for the agent tool's
+# server-to-server calls; it must match the sidecar's .env value. Generate
+# one with: openssl rand -hex 32
+NAMTHEG_SIDECAR_URL=""
+NAMTHEG_INTERNAL_TOKEN=""
