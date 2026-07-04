@@ -42,7 +42,13 @@ recommending actions per asset class.
   profile + preferences page backed by `user_preferences` with Google
   sign-in/out actions, and the `/subscription` page showing the 1 SAR/month
   plan, an env-driven billing link, and the per-user monthly LLM token
-  counter in `llm_token_usage`) shipped. S10 pending; see
+  counter in `llm_token_usage`), and S10 (hardening + deploy: real
+  AES-256-GCM column encryption in `lib/crypto/`, per-user monthly token-cap
+  enforcement in `lib/limits/`, the `lib/i18n/` EN/AR bootstrap with the
+  `<html dir>` RTL flip, App Router error boundaries, the `lib/observability/`
+  structured logger, and the OpenNext + Wrangler deploy config) shipped. All
+  ten v1 stages are landed; the live cloud deploy runs from the
+  [README](README.md) runbook. See
   [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
 - **Repo layout (current):**
   - `Docs/PRD.md` — the source of truth (this file's parent doc)
@@ -73,10 +79,17 @@ recommending actions per asset class.
   - `lib/account/` + `lib/auth-actions.ts`: the `user_preferences` model /
     store, the preferences server action, and the Google sign-in/out actions
     behind the `/account` page (S9)
-  - `lib/limits/` (per-user monthly LLM token counter, `llm_token_usage`) +
-    `lib/billing/` (env-driven checkout link) back the `/subscription` page (S9)
-  - `migrations/` + `wrangler.toml` — D1 schema, applied via
-    `wrangler d1 migrations apply osooly`
+  - `lib/limits/` (per-user monthly LLM token counter `llm_token_usage` +
+    the S10 cap enforcement) + `lib/billing/` (env-driven checkout link) back
+    the `/subscription` page (S9)
+  - `lib/crypto/` (AES-256-GCM behind the `sealPII`/`openPII` seam),
+    `lib/i18n/` (EN/AR dictionary + `<html dir>` RTL), and
+    `lib/observability/` (structured event logger) are the S10 cross-cutting
+    layers; error boundaries live in `app/error.tsx`, `app/global-error.tsx`,
+    and `app/(app)/error.tsx`
+  - `migrations/` + `wrangler.toml` + `open-next.config.ts` — D1 schema (applied
+    via `wrangler d1 migrations apply osooly`) and the OpenNext + Wrangler
+    deploy config; CI/deploy in `.github/workflows/` (S10)
   - `Namtheg/AutoML/` — the sibling project ported into Osooly in S8 (kept
     read-only as the upstream reference)
 - **Canonical version of this block:** [PRD §3.1 Product overview](Docs/PRD.md#31-product-overview)

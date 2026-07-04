@@ -178,7 +178,7 @@ describe("runAgentForUser", () => {
       userId: USER,
       models: scriptedModels(),
     });
-    expect(result).toEqual({ written: 0, classes: [] });
+    expect(result).toEqual({ written: 0, classes: [], tokensUsed: 0 });
     expect(db.recommendations).toHaveLength(0);
   });
 });

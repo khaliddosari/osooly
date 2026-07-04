@@ -1,0 +1,31 @@
+name: Deploy
+
+# Manual only (workflow_dispatch): production deploys never fire automatically
+# on push, so a merge to main can't ship without an explicit click. Requires
+# two repo secrets: CLOUDFLARE_API_TOKEN (Workers + D1 + Vectorize edit) and
+# CLOUDFLARE_ACCOUNT_ID. Runtime app secrets are set once with
+# `wrangler secret put` (see wrangler.toml), not here.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      # Apply any new migrations to the production D1 before shipping code
+      # that depends on them.
+      - run: npx wrangler d1 migrations apply osooly --remote
+      # Deploy the app Worker (OpenNext build + wrangler deploy).
+      - run: npm run deploy
+      # Deploy the market-refresh + alerts cron Worker (separate project).
+      - run: npx wrangler deploy --config workers/cron/wrangler.toml

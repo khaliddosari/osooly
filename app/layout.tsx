@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LayoutShell } from "@/components/layout-shell";
+import { dir } from "@/lib/i18n/locale";
+import { getLocale } from "@/lib/i18n/server";
 
 const TITLE = "Osooly — أصولي";
 const DESCRIPTION =
@@ -17,9 +19,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // Locale drives the language tag and the RTL flip (PRD §3.9); v1 ships EN
+  // full with AR stubbed. Dark-only is a design-system hard rule, so the class
+  // is fixed regardless of locale.
+  const locale = await getLocale();
   return (
-    <html lang="en" className="dark">
+    <html lang={locale} dir={dir(locale)} className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

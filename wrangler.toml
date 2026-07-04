@@ -1,24 +1,41 @@
-# Osooly — Cloudflare config.
-# For now this wires the D1 binding for local dev (`next dev` via
-# initOpenNextCloudflareForDev) and migrations. The Workers deploy config
-# (main, assets, routes) lands with S10.
+# Osooly - Cloudflare config.
+# Wires the D1 binding for local dev (`next dev` via
+# initOpenNextCloudflareForDev), migrations, and the S10 Workers deploy config.
+# The Next.js app is deployed with the OpenNext Cloudflare adapter:
+#   npx opennextjs-cloudflare build   # emits .open-next/worker.js + assets
+#   npx wrangler deploy               # uploads the Worker + static assets
+# See README.md "Deploying" for the full runbook (secrets, D1, Vectorize).
 
 name = "osooly"
 compatibility_date = "2026-05-01"
 compatibility_flags = ["nodejs_compat"]
 
+# OpenNext build output. Harmless for `next dev` (initOpenNextCloudflareForDev
+# proxies bindings and never loads `main`); required for `wrangler deploy`.
+main = ".open-next/worker.js"
+
+[assets]
+binding = "ASSETS"
+directory = ".open-next/assets"
+
+# Workers Logs (PRD 3.9 observability): structured events from the request
+# handlers (lib/observability/log.ts) and the cron/alert workers are queryable
+# by `event` once deployed.
+[observability]
+enabled = true
+
 [[d1_databases]]
 binding = "DB"
 database_name = "osooly"
 # Placeholder so local commands work out of the box. For the real database run
-# `wrangler d1 create osooly` and paste the id it prints here (S10).
+# `wrangler d1 create osooly` and paste the id it prints here before deploying.
 database_id = "0666115c-f2a2-421e-9977-736210a342be"
 migrations_dir = "migrations"
 
-# RAG bindings for the S6 agentic layer (PRD 3.6). Commented out until deploy
-# (S10): wrangler has no local Vectorize simulator, and the index must first
-# be created per the setup commands in lib/rag/vectorize.ts. The agent runs
-# without RAG context while these are absent.
+# RAG bindings for the S6 agentic layer (PRD 3.6). Enable for production: they
+# stay commented for local dev because wrangler has no local Vectorize
+# simulator, and the index must first be created per the setup commands in
+# lib/rag/vectorize.ts. The agent runs without RAG context while absent.
 #
 # [ai]
 # binding = "AI"
@@ -26,3 +43,14 @@ migrations_dir = "migrations"
 # [[vectorize]]
 # binding = "VECTORIZE"
 # index_name = "osooly-rag"
+
+# Secrets (set per environment, never committed):
+#   wrangler secret put AUTH_SECRET
+#   wrangler secret put AUTH_GOOGLE_ID
+#   wrangler secret put AUTH_GOOGLE_SECRET
+#   wrangler secret put DEEPSEEK_API_KEY
+#   wrangler secret put XAI_API_KEY            # optional (live X.com search)
+#   wrangler secret put PII_ENCRYPTION_KEY     # 32-byte AES key (S10)
+#   wrangler secret put NAMTHEG_SIDECAR_URL
+#   wrangler secret put NAMTHEG_INTERNAL_TOKEN
+#   wrangler secret put SUBSCRIPTION_CHECKOUT_URL

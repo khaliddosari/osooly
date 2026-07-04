@@ -151,9 +151,12 @@ interface RawFiringRow {
  * user contact + asset name the n8n payload needs. The class filter reads the
  * predicate JSON so each refresh cron only re-evaluates the rules it can move.
  *
- * PII note (PRD §3.9): `user_email` / `user_name` are [PII] columns. v1 reads
- * them plain (sealPII/openPII are pass-throughs); when S10 lands real
- * column-level encryption these reads must route through openPII().
+ * PII note (PRD §3.9): `user_email` / `user_name` live on the NextAuth-managed
+ * `users` table, written by @auth/d1-adapter, not through Osooly's sealPII seam
+ * (the S10 encryption in lib/crypto/pii.ts covers the columns Osooly's own code
+ * writes, e.g. `assets.details`). `users.email` must stay queryable for account
+ * lookup, so it is deliberately not sealed; these reads are therefore plain and
+ * must NOT be routed through openPII() (it would reject an unsealed value).
  */
 export async function listFiringAlerts(
   db: D1Database,

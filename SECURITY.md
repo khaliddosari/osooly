@@ -8,20 +8,29 @@ non-functional security requirements live in PRD §3.9.
 
 | # | Finding | Severity | Status |
 |---|---------|----------|--------|
-| 1 | PII / OAuth tokens stored in plaintext in D1 | Medium | Deferred to S10 (PRD §3.9) |
+| 1 | PII / OAuth tokens stored in plaintext in D1 | Medium | Fixed for app-written PII (S10); adapter-managed columns tracked below |
 | 2 | CSRF on `POST /api/agent/run` | Medium-Low | Fixed |
 | 3 | Dependency vulnerabilities (esbuild, postcss) | Low (build/dev) | Mitigated; residual is build-only |
 | 4 | No HTTP security headers | Low | Fixed |
 | 5 | Prompt injection via scraped/news text | Low | Hardened |
 | 6 | Twelve Data API key not URL-encoded | Low | Fixed |
 
-### 1. PII / OAuth tokens at rest (deferred by design)
+### 1. PII / OAuth tokens at rest (encryption landed in S10)
 
-Real AES-GCM column encryption is deferred to S10 per PRD §3.9. The seam exists
-today: every read/write of a `[PII]`-marked column goes through `sealPII` /
-`openPII` in [`lib/db.ts`](lib/db.ts), currently pass-throughs. S10 swaps the
-bodies (covering the `accounts` OAuth token columns) without touching call
-sites. Do not change this without updating PRD §3.9 first.
+Column-level encryption is now real (PRD §3.9): `sealPII` / `openPII` in
+[`lib/db.ts`](lib/db.ts) delegate to AES-256-GCM in
+[`lib/crypto/pii.ts`](lib/crypto/pii.ts), keyed by the `PII_ENCRYPTION_KEY`
+secret. The seam stayed synchronous, so no call sites changed. Sealed values
+carry a `v1:` prefix, so legacy plaintext rows (written while the seam was a
+pass-through) keep reading, and a key-free dev environment still runs. This
+covers the `[PII]` columns Osooly's own code writes, today `assets.details`
+(VIN / deed / hallmark / notes).
+
+**Residual:** the NextAuth-managed tables are written by `@auth/d1-adapter`, not
+through this seam. `users.email` must stay queryable for account lookup, so it
+is deliberately not sealed; encrypting the `accounts` OAuth-token columns would
+require wrapping the adapter and is the remaining follow-up. Do not change the
+seam's contract without updating PRD §3.9 first.
 
 ### 2. CSRF on the agent run endpoint (fixed)
 

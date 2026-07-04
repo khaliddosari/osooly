@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   MONTHLY_TOKEN_CAP,
   currentPeriod,
+  recordTokenUsage,
   summarizeUsage,
 } from "./token-usage";
 
@@ -42,5 +43,29 @@ describe("summarizeUsage", () => {
   it("treats negative or non-finite counts as zero", () => {
     expect(summarizeUsage(-100, now).used).toBe(0);
     expect(summarizeUsage(Number.NaN, now).used).toBe(0);
+  });
+});
+
+describe("recordTokenUsage", () => {
+  function spyDb() {
+    const run = vi.fn(async () => ({}));
+    const bind = vi.fn(() => ({ run }));
+    const prepare = vi.fn(() => ({ bind }));
+    return { db: { prepare } as unknown as D1Database, prepare, bind, run };
+  }
+
+  it("skips the write for a zero, negative, or non-finite delta", async () => {
+    const { db, prepare } = spyDb();
+    await recordTokenUsage(db, "u1", 0);
+    await recordTokenUsage(db, "u1", -50);
+    await recordTokenUsage(db, "u1", Number.NaN);
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("upserts a rounded token delta for a positive count", async () => {
+    const { db, bind, run } = spyDb();
+    await recordTokenUsage(db, "u1", 123.6);
+    expect(run).toHaveBeenCalledOnce();
+    expect(bind).toHaveBeenCalledWith("u1", expect.any(String), 124);
   });
 });

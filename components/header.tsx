@@ -2,20 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { t, type MessageKey } from "@/lib/i18n/dictionary";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/locale";
 import { cn } from "@/lib/utils";
 import { BrandLockup } from "./brand";
 
-/** The six v1 tabs, in PRD §3.4 order. */
+/** The six v1 tabs, in PRD §3.4 order; labels come from the dictionary. */
 const TABS = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Namtheg", href: "/namtheg" },
-  { label: "Assets", href: "/assets" },
-  { label: "Customize", href: "/customize" },
-  { label: "Account", href: "/account" },
-  { label: "Subscription", href: "/subscription" },
-] as const;
+  { key: "nav.dashboard", href: "/dashboard" },
+  { key: "nav.namtheg", href: "/namtheg" },
+  { key: "nav.assets", href: "/assets" },
+  { key: "nav.customize", href: "/customize" },
+  { key: "nav.account", href: "/account" },
+  { key: "nav.subscription", href: "/subscription" },
+] as const satisfies readonly { key: MessageKey; href: string }[];
 
-export function Header() {
+export function Header({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
   const pathname = usePathname() ?? "";
 
   return (
@@ -46,7 +48,7 @@ export function Header() {
                         : "text-on-surface-variant hover:text-on-surface"
                     )}
                   >
-                    {tab.label}
+                    {t(locale, tab.key)}
                     {active && (
                       <span
                         aria-hidden="true"

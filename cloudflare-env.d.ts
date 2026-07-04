@@ -32,4 +32,11 @@ interface CloudflareEnv {
   // payment link in dev). Unset: the page shows the plan but disables the
   // button (lib/billing/provider.ts).
   SUBSCRIPTION_CHECKOUT_URL?: string;
+
+  // S10 hardening (PRD §3.9). 32-byte AES-256-GCM key (64 hex chars or base64)
+  // for column-level PII encryption (lib/crypto/pii.ts). Set in prod with
+  // `wrangler secret put PII_ENCRYPTION_KEY`; unset in dev leaves the seam a
+  // pass-through. Read from process.env, so it is intentionally not consumed
+  // via the binding object.
+  PII_ENCRYPTION_KEY?: string;
 }

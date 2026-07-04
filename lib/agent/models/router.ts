@@ -68,9 +68,34 @@ export function shouldEscalate(triage: {
   );
 }
 
+/**
+ * Token accounting from a model reply (PRD §3.9 cost controls). LangChain
+ * populates `usage_metadata` on the AIMessage from the provider's usage block;
+ * it is optional here so test stubs that return only `content` still satisfy
+ * ChatLike (and simply contribute zero to the run's token tally).
+ */
+export interface UsageMetadata {
+  input_tokens?: number;
+  output_tokens?: number;
+  total_tokens?: number;
+}
+
+export interface ChatReply {
+  content: unknown;
+  usage_metadata?: UsageMetadata | null;
+}
+
+/** Total tokens a reply reports, or 0 when the provider omitted usage. */
+export function replyTokens(reply: ChatReply): number {
+  const total = reply.usage_metadata?.total_tokens;
+  return typeof total === "number" && Number.isFinite(total) && total > 0
+    ? total
+    : 0;
+}
+
 /** The minimal chat surface the agent layer needs; ChatOpenAI satisfies it. */
 export interface ChatLike {
-  invoke(messages: ["system" | "human", string][]): Promise<{ content: unknown }>;
+  invoke(messages: ["system" | "human", string][]): Promise<ChatReply>;
 }
 
 /** A chat model paired with the choice that built it, for `model` stamps. */

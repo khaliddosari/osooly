@@ -44,3 +44,10 @@ NAMTHEG_INTERNAL_TOKEN=""
 # /subscription page opens (a Stripe / Moyasar / Tap test-mode payment link in
 # dev). Leave empty to show the plan with the billing button disabled.
 SUBSCRIPTION_CHECKOUT_URL=""
+
+# S10 hardening (PRD 3.9). 32-byte AES-256-GCM key for column-level PII
+# encryption (lib/crypto/pii.ts). 64 hex chars or a base64 string decoding to
+# 32 bytes. Generate one with: openssl rand -hex 32
+# Leave empty in dev to keep the encryption seam a pass-through. In production
+# set it as a secret: wrangler secret put PII_ENCRYPTION_KEY
+PII_ENCRYPTION_KEY=""

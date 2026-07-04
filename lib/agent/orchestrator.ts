@@ -49,6 +49,13 @@ const AgentState = Annotation.Root({
     reducer: (_prev, next) => next,
     default: () => 0,
   }),
+  // Tokens spent across every model call in the run, summed as the class
+  // nodes report theirs, so the run route can meter it against the per-user
+  // monthly cap (PRD §3.9).
+  tokens: Annotation<number>({
+    reducer: (prev, next) => prev + next,
+    default: () => 0,
+  }),
 });
 
 export interface AgentModels {
@@ -72,6 +79,8 @@ export interface AgentRunDeps {
 export interface AgentRunResult {
   written: number;
   classes: string[];
+  /** Total model tokens this run spent (PRD §3.9); recorded to the counter. */
+  tokensUsed: number;
 }
 
 export async function runAgentForUser(
@@ -91,7 +100,14 @@ export async function runAgentForUser(
   // drafts, never to a failed run.
   const classNode = (agent: SubAgent) => async () => {
     try {
-      return { drafts: await runSubAgent(agent, ctx, rag, models, liveNews) };
+      const { drafts, tokens } = await runSubAgent(
+        agent,
+        ctx,
+        rag,
+        models,
+        liveNews
+      );
+      return { drafts, tokens };
     } catch (error) {
       console.error(`[agent] ${agent.assetClass} sub-agent failed:`, error);
       return {};
@@ -135,6 +151,7 @@ export async function runAgentForUser(
   return {
     written: finalState.written,
     classes: finalState.plan.map((entry) => entry.assetClass),
+    tokensUsed: finalState.tokens,
   };
 }
 
@@ -144,7 +161,7 @@ async function runSubAgent(
   rag: RagStore,
   models: AgentModels,
   liveNews: (assetClass: AssetClass) => Promise<string[]>
-): Promise<NewRecommendation[]> {
+): Promise<{ drafts: NewRecommendation[]; tokens: number }> {
   // One live search per class per run (PRD §3.6); a failed search degrades
   // to RSS-corpus context only, never to a failed class.
   let liveLines: string[] = [];
@@ -155,6 +172,7 @@ async function runSubAgent(
   }
 
   const drafts: NewRecommendation[] = [];
+  let tokens = 0;
   for (const asset of await agent.gather(ctx)) {
     let ragContext: string[] = [];
     try {
@@ -187,6 +205,7 @@ async function runSubAgent(
       },
       models
     );
+    tokens += outcome.tokens;
     drafts.push({
       userId: ctx.userId as string,
       assetId: asset.assetId,
@@ -197,5 +216,5 @@ async function runSubAgent(
       model: modelStamp(outcome.modelChoice),
     });
   }
-  return drafts;
+  return { drafts, tokens };
 }

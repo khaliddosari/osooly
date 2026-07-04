@@ -3,7 +3,7 @@ import {
   RECOMMENDATION_ACTIONS,
   type RecommendationAction,
 } from "@/lib/recommendations";
-import { shouldEscalate, type BoundModel } from "./models/router";
+import { replyTokens, shouldEscalate, type BoundModel } from "./models/router";
 
 /**
  * Per-asset drafting (PRD §3.6): a cheap triage call classifies whether the
@@ -161,10 +161,15 @@ export function capForStaleness(
 export async function draftRecommendation(
   brief: AssetBrief,
   models: { triage: BoundModel; reasoning: BoundModel }
-): Promise<DraftOutcome & { modelChoice: BoundModel["choice"] }> {
+): Promise<DraftOutcome & { modelChoice: BoundModel["choice"]; tokens: number }> {
+  // Tokens spent on this holding, summed across the triage and (if it
+  // escalates) reasoning calls, so the orchestrator can meter the run against
+  // the per-user monthly cap (PRD §3.9).
+  let tokens = 0;
   let triage: Draft | null = null;
   try {
     const reply = await models.triage.chat.invoke(triageMessages(brief));
+    tokens += replyTokens(reply);
     triage = parseDraft(reply.content);
   } catch {
     triage = null; // unparseable or failed cheap call: escalate
@@ -176,12 +181,14 @@ export async function draftRecommendation(
       confidence: capForStaleness(triage.confidence, brief.freshness),
       escalated: false,
       modelChoice: models.triage.choice,
+      tokens,
     };
   }
 
   let draft: Draft;
   try {
     const reply = await models.reasoning.chat.invoke(reasoningMessages(brief));
+    tokens += replyTokens(reply);
     draft = parseDraft(reply.content);
   } catch {
     draft = {
@@ -196,5 +203,6 @@ export async function draftRecommendation(
     confidence: capForStaleness(draft.confidence, brief.freshness),
     escalated: true,
     modelChoice: models.reasoning.choice,
+    tokens,
   };
 }

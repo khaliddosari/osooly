@@ -1,0 +1,22 @@
+name: CI
+
+# Keep the tests + production build green on every push and PR (CLAUDE.md:
+# "keep them green"; CI wiring lands in S10). No secrets needed: the build
+# reads runtime config at request time, not at build time.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
