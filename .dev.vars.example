@@ -39,3 +39,8 @@ XAI_API_KEY=""
 # one with: openssl rand -hex 32
 NAMTHEG_SIDECAR_URL=""
 NAMTHEG_INTERNAL_TOKEN=""
+
+# S9 subscription (PRD 3.10). The provider checkout / manage-billing link the
+# /subscription page opens (a Stripe / Moyasar / Tap test-mode payment link in
+# dev). Leave empty to show the plan with the billing button disabled.
+SUBSCRIPTION_CHECKOUT_URL=""

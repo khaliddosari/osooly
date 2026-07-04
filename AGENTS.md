@@ -36,8 +36,14 @@ recommending actions per asset class.
   fan-out), and S8 (Namtheg port: the FastAPI sidecar in `sidecar/` with
   D1-backed run storage + the NextAuth session bridge, the `/namtheg`
   upload→preview→running→result→inference flow behind the `/api/namtheg`
-  proxy, and the cross-class `run_automl` agent tool) shipped. S9+ pending;
-  see [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
+  proxy, and the cross-class `run_automl` agent tool), and S9 (secondary
+  pages: the `/assets` flat ledger over the `assets` table with
+  search/filter/add/edit/delete behind `app/api/assets/`, the `/account`
+  profile + preferences page backed by `user_preferences` with Google
+  sign-in/out actions, and the `/subscription` page showing the 1 SAR/month
+  plan, an env-driven billing link, and the per-user monthly LLM token
+  counter in `llm_token_usage`) shipped. S10 pending; see
+  [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
 - **Repo layout (current):**
   - `Docs/PRD.md` — the source of truth (this file's parent doc)
   - `Docs/Liquid Glass-Portfolio Design System/` — visual source of truth
@@ -61,6 +67,14 @@ recommending actions per asset class.
     bridge (`auth_bridge.py`), in-process inference. Consumed through the
     `app/api/namtheg/` proxy by the `/namtheg` pages (`components/namtheg/`,
     `lib/namtheg/`) and by the `run_automl` tool in `src/agent/tools/automl/`
+  - `lib/assets/` + `app/api/assets/`: the `assets`-ledger value model / D1
+    store and the per-user holdings CRUD behind the `/assets` page's
+    `components/asset-table.tsx` (S9)
+  - `lib/account/` + `lib/auth-actions.ts`: the `user_preferences` model /
+    store, the preferences server action, and the Google sign-in/out actions
+    behind the `/account` page (S9)
+  - `lib/limits/` (per-user monthly LLM token counter, `llm_token_usage`) +
+    `lib/billing/` (env-driven checkout link) back the `/subscription` page (S9)
   - `migrations/` + `wrangler.toml` — D1 schema, applied via
     `wrangler d1 migrations apply osooly`
   - `Namtheg/AutoML/` — the sibling project ported into Osooly in S8 (kept

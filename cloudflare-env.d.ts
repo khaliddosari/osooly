@@ -26,4 +26,10 @@ interface CloudflareEnv {
   // sidecar's NAMTHEG_INTERNAL_TOKEN.
   NAMTHEG_SIDECAR_URL?: string;
   NAMTHEG_INTERNAL_TOKEN?: string;
+
+  // S9 subscription (PRD §3.10). The provider checkout / manage-billing URL
+  // the /subscription page links to (a Stripe / Moyasar / Tap test-mode
+  // payment link in dev). Unset: the page shows the plan but disables the
+  // button (lib/billing/provider.ts).
+  SUBSCRIPTION_CHECKOUT_URL?: string;
 }

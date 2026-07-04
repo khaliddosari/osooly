@@ -234,7 +234,10 @@ proxy so cookies and CORS stay simple.
 - **Auth:** NextAuth.js with Google provider; session stored in D1.
 - **Database:** Cloudflare D1 (SQLite at the edge). Schemas: `users`, `assets`,
   `transactions`, `recommendations`, `alerts`, `user_dashboard_layout`,
-  `card_registry_overrides`, `market_snapshot`.
+  `card_registry_overrides`, `market_snapshot`, plus `user_preferences`
+  (per-user locale + display currency) and `llm_token_usage` (the per-user
+  monthly token counter surfaced on /subscription, §3.9) added with the
+  secondary pages.
 - **Vector store:** Cloudflare Vectorize for the dual RAG corpora; embeddings via
   Workers AI `@cf/baai/bge-m3` (§3.6).
 - **Agentic layer:** LangChain + LangGraph; runs in a Cloudflare Worker (or Node.js
