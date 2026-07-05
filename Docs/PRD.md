@@ -220,9 +220,13 @@ pandas at required scale). The sidecar:
   existing Namtheg Next.js components in `Namtheg/AutoML/Frontend/components/` are the
   starting point and are already on the same design system.
 
-**Hosting:** sidecar deployed alongside Osooly Workers (Cloudflare Containers or a small
-Render service — decided at build time based on cost). Same domain via Cloudflare reverse
-proxy so cookies and CORS stay simple.
+**Hosting (resolved):** the sidecar runs on **Cloudflare Containers**
+(`workers/namtheg-sidecar/`, a Container-backed Worker fronting `sidecar/Dockerfile`),
+not Render. This required upgrading the Cloudflare account to the Workers Paid plan
+($5/mo base), since Containers isn't available on the free tier. The browser never talks
+to the sidecar's Workers subdomain directly: `app/api/namtheg/[...path]/route.ts` proxies
+server-to-server, so cookies and CORS stay same-origin from the browser's perspective
+without needing a literal shared domain.
 
 ---
 
@@ -253,8 +257,8 @@ proxy so cookies and CORS stay simple.
 - **AutoML sidecar:** the ported Namtheg FastAPI service (§3.7) — shares D1, called by
   card agents and by the `/namtheg` route.
 - **Scheduling:** Cloudflare Cron Triggers per refresh job.
-- **Notifications & workflow automation:** **n8n** (self-hosted on a small VPS, or n8n
-  Cloud — decided at deploy time). See §3.8a.
+- **Notifications & workflow automation:** **n8n Cloud** (resolved; not self-hosted).
+  See §3.8a.
 - **Hosting:** Cloudflare Pages (Next.js) + Workers; secrets via Wrangler.
 
 ---
@@ -334,6 +338,13 @@ version-controlled as exported JSON in `n8n/workflows/` in this repo.
     keyless; feed list overridable via `NEWS_FEEDS`
 - All paid-upgrade decisions deferred until real usage data exists. The adapter pattern
   in §3.5a makes the swap a one-file change.
+- **Namtheg sidecar hosting: Cloudflare Containers** (§3.7), which required the one
+  paid-tier exception in this list: Containers needs the Workers Paid plan ($5/mo base).
+- **n8n hosting: n8n Cloud** (§3.8a), not self-hosted.
+- **v1 deploy verified live (July 2026):** D1, Vectorize, the sidecar Container, the
+  cron Worker, and the app Worker are all deployed and confirmed reachable; the
+  `deploy.yml` GitHub Actions workflow deploys all three Workers cleanly via
+  `workflow_dispatch`. See `README.md` "Deploying" for the runbook.
 
 ---
 

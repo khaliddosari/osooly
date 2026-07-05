@@ -47,9 +47,13 @@ recommending actions per asset class.
   enforcement in `lib/limits/`, the `lib/i18n/` EN/AR bootstrap with the
   `<html dir>` RTL flip, App Router error boundaries, the `lib/observability/`
   structured logger, and the OpenNext + Wrangler deploy config) shipped. All
-  ten v1 stages are landed; the live cloud deploy runs from the
-  [README](README.md) runbook. See
-  [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
+  ten v1 stages are landed, and the deploy is verified live (July 2026): D1,
+  Vectorize, the app Worker, the cron Worker, and the Namtheg sidecar
+  (Cloudflare Containers, per the [README](README.md) runbook) are all
+  reachable, and `deploy.yml` deploys all three Workers cleanly via
+  `workflow_dispatch`. The two hosting decisions PRD §3.7/§3.8 once deferred
+  are resolved: Cloudflare Containers for the sidecar, n8n Cloud for alerts.
+  See [`Docs/IMPLEMENTATION-STAGES.md`](Docs/IMPLEMENTATION-STAGES.md).
 - **Repo layout (current):**
   - `Docs/PRD.md` — the source of truth (this file's parent doc)
   - `Docs/Liquid Glass-Portfolio Design System/` — visual source of truth

@@ -20,7 +20,9 @@ aesthetic.
 
 ## Running locally
 
-Prerequisites: Node 20+ and npm.
+Prerequisites: Node 22+ and npm (wrangler, miniflare, and `@cloudflare/kv-asset-handler`
+all require it). Deploying also needs Docker running locally, to build the Namtheg
+sidecar's container image.
 
 ```bash
 npm install
@@ -44,14 +46,21 @@ same D1; run it per the header comment in
 
 ## Deploying
 
+**Status: live.** Osooly v1 is deployed and verified working end-to-end (D1, Vectorize,
+the Namtheg sidecar, the cron Worker, and the app Worker all reachable; the automated
+`deploy.yml` pipeline deploys all three Workers cleanly). The steps below are the
+from-scratch runbook for standing up a new deployment (a second environment, a fork, a
+new Cloudflare account).
+
 The Next.js app deploys to Cloudflare Workers via the OpenNext adapter; config
 lives in [`wrangler.toml`](wrangler.toml) and [`open-next.config.ts`](open-next.config.ts).
 One-time setup:
 
 ```bash
-npx wrangler d1 create osooly                     # paste the printed id into both wrangler.toml files
+npx wrangler d1 create osooly                     # paste the printed id into all three wrangler.toml files
+npx wrangler d1 migrations apply osooly --remote
 npx wrangler vectorize create osooly-rag --dimensions 1024 --metric cosine
-# then uncomment the [ai] + [[vectorize]] blocks in wrangler.toml
+# then uncomment the [ai] + [[vectorize]] blocks in wrangler.toml and workers/cron/wrangler.toml
 npx wrangler secret put AUTH_SECRET               # and the rest listed in wrangler.toml
 ```
 
@@ -60,24 +69,35 @@ Every release:
 ```bash
 npx wrangler d1 migrations apply osooly --remote  # apply new migrations first
 npm run deploy                                    # OpenNext build + wrangler deploy (app Worker)
-npx wrangler deploy --config workers/cron/wrangler.toml   # cron/alerts Worker
+npx wrangler deploy --config workers/cron/wrangler.toml            # cron/alerts Worker
+npx wrangler deploy --config workers/namtheg-sidecar/wrangler.toml # Namtheg sidecar Container Worker
 ```
 
 CI runs the tests + build on every push/PR
 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)); production deploys are a
 manual `workflow_dispatch` ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml))
-so a merge never ships on its own. It needs the `CLOUDFLARE_API_TOKEN` and
-`CLOUDFLARE_ACCOUNT_ID` repo secrets.
+so a merge never ships on its own. It needs two repo secrets:
 
-Two hosting choices the PRD defers to deploy time:
+- `CLOUDFLARE_ACCOUNT_ID`
+- `CLOUDFLARE_API_TOKEN` scoped to **Workers Scripts: Edit**, **D1: Edit**,
+  **Vectorize: Edit**, and **Cloudflare Containers: Edit** (easy to miss the last one;
+  the sidecar deploy step fails with a 403 without it).
 
-- **Namtheg sidecar** (PRD §3.7): the FastAPI service in [`sidecar/`](sidecar/) runs
-  outside Workers (it needs scikit-learn / pandas). Default recommendation is
-  Cloudflare Containers (one platform, same-domain reverse proxy); a small Render
-  service is the cost-driven alternative. Point `NAMTHEG_SIDECAR_URL` at it.
-- **n8n** (PRD §3.8a): default to n8n Cloud to skip ops, or self-host on a small VPS.
-  Point the cron Worker's `ALERTS_WEBHOOK_URL` at the deployed
-  `/webhook/osooly-alert` and import [`n8n/workflows/`](n8n/workflows/).
+Both hosting decisions the PRD once deferred to deploy time are now resolved:
+
+- **Namtheg sidecar** (PRD §3.7): **Cloudflare Containers**, not Render. The FastAPI
+  service in [`sidecar/`](sidecar/) (needs scikit-learn / pandas, can't run on Workers)
+  is fronted by [`workers/namtheg-sidecar/`](workers/namtheg-sidecar/), a Container-backed
+  Worker. This requires the Cloudflare account to be on the **Workers Paid plan**
+  ($5/mo base), since Containers isn't available on the free tier. `NAMTHEG_SIDECAR_URL`
+  on the main app points at that Worker's deployed URL.
+- **n8n** (PRD §3.8a): **n8n Cloud**, not self-hosted. Import
+  [`n8n/workflows/`](n8n/workflows/) into your workspace, attach real credentials to the
+  channels you want (email SMTP, Twilio for WhatsApp, a Telegram bot token), publish the
+  workflow, and point the cron Worker's `ALERTS_WEBHOOK_URL` secret at its production
+  webhook URL. n8n Cloud doesn't expose `$env` to workflows the way self-hosted does, so
+  the **Confirm Delivery** node's URL and `Authorization` header need to be set directly
+  in the node rather than via environment variables.
 
 ## Team
 
