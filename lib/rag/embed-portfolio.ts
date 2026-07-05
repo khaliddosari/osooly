@@ -1,5 +1,17 @@
 import type { RagDocument, RagStore } from "./vectorize";
 
+// KNOWN BUG (github.com/khaliddosari/osooly/issues/1, tracked for later):
+// the id built at line ~66
+// below concatenates two raw UUIDs ("portfolio:" + userId + ":" + asset.id),
+// which comes out to 83 bytes - over Vectorize's 64-byte id limit - so
+// syncPortfolioCorpus() fails on every call for any user/asset with a
+// standard UUID. The failure is caught and logged in
+// lib/agent/orchestrator.ts ("[agent] portfolio corpus sync failed"), so the
+// agent run still completes, just silently without portfolio RAG context.
+// embed-news.ts already solves this correctly via the stableId() hash helper
+// in vectorize.ts; embed-portfolio.ts should use the same helper instead of
+// raw concatenation.
+
 /**
  * Portfolio corpus (PRD §3.6 collection a): one document per asset,
  * describing the holding and its ledger movements in plain prose the
