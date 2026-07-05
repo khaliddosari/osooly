@@ -17,10 +17,11 @@ compatibility_flags = ["nodejs_compat"]
 
 # Refresh cadences per PRD §3.6 (UTC; AST = UTC+3). The expressions must
 # match the CRON_* constants in index.ts byte-for-byte — dispatch keys on
-# controller.cron.
+# controller.cron. Cloudflare numbers weekdays 1=Sunday..7=Saturday (not the
+# 0=Sunday Unix convention), so Sun-Thu is 1-5.
 [triggers]
 crons = [
-  "* 7-11 * * 0-4", # stocks: every minute, Sun-Thu 10:00-14:59 AST (Tadawul hours)
+  "* 7-11 * * 1-5", # stocks: every minute, Sun-Thu 10:00-14:59 AST (Tadawul hours)
   "0 22 * * *",     # jewelry (gold spot): nightly 01:00 AST
   "30 22 * * *",    # autos (Syarah + Haraj): nightly 01:30 AST
   "0 23 * * *",     # real estate (REGA + Aqar): nightly 02:00 AST
@@ -34,22 +35,19 @@ crons = [
 # set in prod with `wrangler secret put`. S10 adds the route that makes
 # /alert-delivery publicly reachable.
 
-# RAG bindings for the news refresh (PRD 3.6). Commented out until deploy
-# (S10): wrangler has no local Vectorize simulator, and the index must first
-# be created per the setup commands in lib/rag/vectorize.ts. The job logs a
-# clean skip while these are absent.
-#
-# [ai]
-# binding = "AI"
-#
-# [[vectorize]]
-# binding = "VECTORIZE"
-# index_name = "osooly-rag"
+# RAG bindings for the news refresh (PRD 3.6). Local dev still runs without
+# these: wrangler has no local Vectorize simulator, so the job logs a clean
+# skip. The `osooly-rag` index exists in production as of S10.
+[ai]
+binding = "AI"
+
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "osooly-rag"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "osooly"
-# Same placeholder as the root wrangler.toml — replace both with the real id
-# from `wrangler d1 create osooly` at deploy time (S10).
+# Real production database, same id as the root wrangler.toml (S10).
 database_id = "0666115c-f2a2-421e-9977-736210a342be"
 migrations_dir = "../../migrations"

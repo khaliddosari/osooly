@@ -19,7 +19,7 @@ import { refreshStocks } from "./stocks";
  * Cloudflare passes the matching cron expression in controller.cron and we
  * dispatch on it. Cadences (UTC; AST = UTC+3):
  *
- *   stocks       * 7-11 * * 0-4   every minute, Sun–Thu 10:00–14:59 AST
+ *   stocks       * 7-11 * * 1-5   every minute, Sun–Thu 10:00–14:59 AST
  *                                  (Tadawul trading hours)
  *   jewelry      0 22 * * *        nightly 01:00 AST
  *   autos        30 22 * * *       nightly 01:30 AST

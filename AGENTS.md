@@ -73,6 +73,10 @@ recommending actions per asset class.
     bridge (`auth_bridge.py`), in-process inference. Consumed through the
     `app/api/namtheg/` proxy by the `/namtheg` pages (`components/namtheg/`,
     `lib/namtheg/`) and by the `run_automl` tool in `src/agent/tools/automl/`
+  - `workers/namtheg-sidecar/`: the Cloudflare Containers Worker that runs
+    `sidecar/Dockerfile` in production (hosting decision resolved post-S10)
+    and fronts it at a plain HTTPS URL; the `/api/namtheg` proxy only ever
+    sees that URL via `NAMTHEG_SIDECAR_URL`, so the host is swappable
   - `lib/assets/` + `app/api/assets/`: the `assets`-ledger value model / D1
     store and the per-user holdings CRUD behind the `/assets` page's
     `components/asset-table.tsx` (S9)

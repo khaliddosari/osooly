@@ -27,7 +27,10 @@ const csp = [
   `connect-src 'self'${isDev ? " ws:" : ""}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
+  // 'self' plus Google: NextAuth's sign-in form POSTs same-origin, then the
+  // server 302s to Google's OAuth consent screen - browsers enforce
+  // form-action against that redirect hop too, not just the initial target.
+  "form-action 'self' https://accounts.google.com",
   "object-src 'none'",
 ].join("; ");
 

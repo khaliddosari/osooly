@@ -39,8 +39,12 @@ export interface CronEnv {
   ALERTS_WEBHOOK_TOKEN?: string;
 }
 
-/** Must match workers/cron/wrangler.toml [triggers] byte-for-byte. */
-export const CRON_STOCKS = "* 7-11 * * 0-4";
+/**
+ * Must match workers/cron/wrangler.toml [triggers] byte-for-byte. Cloudflare
+ * Cron Triggers number weekdays 1=Sunday..7=Saturday (not the 0=Sunday Unix
+ * convention), so Sun-Thu is 1-5.
+ */
+export const CRON_STOCKS = "* 7-11 * * 1-5";
 export const CRON_GOLD = "0 22 * * *";
 export const CRON_AUTOS = "30 22 * * *";
 export const CRON_REAL_ESTATE = "0 23 * * *";

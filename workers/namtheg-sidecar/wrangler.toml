@@ -1,0 +1,35 @@
+# Osooly Namtheg sidecar container (S7 hosting decision, PRD 3.7). Separate
+# Wrangler project that fronts the FastAPI sidecar in ../../sidecar as a
+# Cloudflare Container. The main app's app/api/namtheg/[...path]/route.ts
+# only ever sees this Worker's deployed URL via NAMTHEG_SIDECAR_URL - it
+# treats the sidecar as a plain HTTPS endpoint, so this Worker could be
+# swapped for any other host without touching the proxy route.
+#
+# Deploy: npx wrangler deploy --config workers/namtheg-sidecar/wrangler.toml
+# (builds sidecar/Dockerfile locally via Docker and pushes to Cloudflare's
+# managed registry; first deploy takes a few minutes). Then:
+#   npx wrangler secret put OPENROUTER_API_KEY --config workers/namtheg-sidecar/wrangler.toml
+#   npx wrangler secret put CLOUDFLARE_API_TOKEN --config workers/namtheg-sidecar/wrangler.toml
+#   npx wrangler secret put CLOUDFLARE_ACCOUNT_ID --config workers/namtheg-sidecar/wrangler.toml
+#   npx wrangler secret put CLOUDFLARE_D1_DATABASE_ID --config workers/namtheg-sidecar/wrangler.toml
+#   npx wrangler secret put NAMTHEG_INTERNAL_TOKEN --config workers/namtheg-sidecar/wrangler.toml
+# then set NAMTHEG_SIDECAR_URL on the main app to this Worker's *.workers.dev URL.
+
+name = "osooly-namtheg-sidecar"
+main = "index.ts"
+compatibility_date = "2026-05-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[containers]]
+class_name = "NamthegSidecar"
+image = "../../sidecar/Dockerfile"
+instance_type = "basic"
+max_instances = 2
+
+[[durable_objects.bindings]]
+name = "SIDECAR"
+class_name = "NamthegSidecar"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["NamthegSidecar"]

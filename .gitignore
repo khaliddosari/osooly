@@ -29,6 +29,7 @@ pnpm-debug.log*
 
 # ─── Cloudflare / Wrangler ─────────────────────────────────────────────────────
 .wrangler/
+.open-next/
 .dev.vars
 .dev.vars.*
 !.dev.vars.example
