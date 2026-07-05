@@ -2,9 +2,10 @@
 
 import { AlertRuleForm, type AlertTarget } from "@/components/alert-rule-form";
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
+import { Money } from "@/components/money";
 import { RecommendationList } from "@/components/recommendation-list";
 import type { CardProps } from "@/lib/cards/types";
-import { asNumber, formatMoney } from "@/lib/format";
+import { asNumber } from "@/lib/format";
 import { usableReading } from "@/lib/market-snapshot";
 import { GOLD_SYMBOL, type JewelryMarketData } from "./fetcher";
 
@@ -54,7 +55,7 @@ function SpotHeadline({ spot }: { spot: JewelryMarketData["spot"] }) {
       {priced ? (
         <>
           <span className="text-headline-md text-on-surface">
-            {formatMoney(priced.price, priced.currency, 2)}
+            <Money value={priced.price} currency={priced.currency} fractionDigits={2} />
             <span className="text-label-md text-on-surface-variant">
               {" "}
               / gram
@@ -62,7 +63,7 @@ function SpotHeadline({ spot }: { spot: JewelryMarketData["spot"] }) {
           </span>
           {usdPerOunce !== null && usdToSar !== null && (
             <span className="text-label-sm text-on-surface-variant">
-              {formatMoney(usdPerOunce, "USD")} /oz × {usdToSar.toFixed(2)}{" "}
+              <Money value={usdPerOunce} currency="USD" /> /oz × {usdToSar.toFixed(2)}{" "}
               USD→SAR
             </span>
           )}
@@ -93,11 +94,15 @@ function Inventory({ market }: { market: JewelryMarketData }) {
           Inventory · {market.totalGrams} g
         </span>
         <span className="text-body-md font-semibold text-on-surface">
-          {market.totalMarketValueSar !== null
-            ? formatMoney(market.totalMarketValueSar)
-            : market.totalPurchaseValue > 0
-              ? `${formatMoney(market.totalPurchaseValue)} (user-entered)`
-              : "unpriced"}
+          {market.totalMarketValueSar !== null ? (
+            <Money value={market.totalMarketValueSar} />
+          ) : market.totalPurchaseValue > 0 ? (
+            <>
+              <Money value={market.totalPurchaseValue} /> (user-entered)
+            </>
+          ) : (
+            "unpriced"
+          )}
         </span>
       </div>
       <ul className="flex flex-col divide-y divide-outline-variant">
@@ -115,11 +120,13 @@ function Inventory({ market }: { market: JewelryMarketData }) {
               </span>
             </div>
             <span className="text-body-md text-on-surface">
-              {piece.marketValueSar !== null
-                ? formatMoney(piece.marketValueSar)
-                : piece.purchasePrice !== null
-                  ? formatMoney(piece.purchasePrice, piece.purchaseCurrency)
-                  : "unpriced"}
+              {piece.marketValueSar !== null ? (
+                <Money value={piece.marketValueSar} />
+              ) : piece.purchasePrice !== null ? (
+                <Money value={piece.purchasePrice} currency={piece.purchaseCurrency} />
+              ) : (
+                "unpriced"
+              )}
             </span>
           </li>
         ))}

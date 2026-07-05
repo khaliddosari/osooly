@@ -3,9 +3,10 @@
 import { AlertRuleForm, type AlertTarget } from "@/components/alert-rule-form";
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
 import { Icon } from "@/components/icon";
+import { Money } from "@/components/money";
 import { RecommendationList } from "@/components/recommendation-list";
 import type { CardProps } from "@/lib/cards/types";
-import { asNumber, formatMoney, formatSignedPercent } from "@/lib/format";
+import { asNumber, formatSignedPercent } from "@/lib/format";
 import { usableReading } from "@/lib/market-snapshot";
 import { cn } from "@/lib/utils";
 import type { StockHolding, StockMarketData } from "./fetcher";
@@ -91,7 +92,7 @@ function IndexHeadline({ index }: { index: StockMarketData["index"] }) {
       </div>
       <div className="flex flex-wrap items-baseline gap-3">
         <span className="text-headline-md text-on-surface">
-          {formatMoney(priced.price, priced.currency)}
+          <Money value={priced.price} currency={priced.currency} />
         </span>
         {pct !== null && (
           <span
@@ -141,16 +142,20 @@ function HoldingRow({ holding }: { holding: StockHolding }) {
           {holding.symbol ?? holding.name}
         </span>
         <span className="truncate text-label-sm text-on-surface-variant">
-          {quote
-            ? `${holding.quantity} × ${formatMoney(quote.price, quote.currency, 2)}`
-            : holding.name}
+          {quote ? (
+            <>
+              {holding.quantity} × <Money value={quote.price} currency={quote.currency} fractionDigits={2} />
+            </>
+          ) : (
+            holding.name
+          )}
         </span>
       </div>
       <div className="flex flex-col items-end gap-0.5">
         {quote ? (
           <>
             <span className="text-body-md font-semibold text-on-surface">
-              {formatMoney(quote.price * holding.quantity, quote.currency)}
+              <Money value={quote.price * holding.quantity} currency={quote.currency} />
             </span>
             {pct !== null && (
               <span
@@ -167,10 +172,10 @@ function HoldingRow({ holding }: { holding: StockHolding }) {
         ) : holding.purchasePrice !== null ? (
           <>
             <span className="text-body-md font-semibold text-on-surface">
-              {formatMoney(
-                holding.purchasePrice * holding.quantity,
-                holding.purchaseCurrency
-              )}
+              <Money
+                value={holding.purchasePrice * holding.quantity}
+                currency={holding.purchaseCurrency}
+              />
             </span>
             <span className="text-label-sm text-on-surface-variant">
               user-entered

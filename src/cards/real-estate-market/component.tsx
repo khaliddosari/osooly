@@ -2,9 +2,9 @@
 
 import { AlertRuleForm, type AlertTarget } from "@/components/alert-rule-form";
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
+import { Money } from "@/components/money";
 import { RecommendationList } from "@/components/recommendation-list";
 import type { CardProps } from "@/lib/cards/types";
-import { formatMoney } from "@/lib/format";
 import { usableReading } from "@/lib/market-snapshot";
 import type {
   CityMarket,
@@ -91,7 +91,7 @@ function CityRow({ market }: { market: CityMarket }) {
         )}
         {asking && (
           <span className="whitespace-nowrap">
-            asking median {formatMoney(asking.price)}
+            asking median <Money value={asking.price} />
           </span>
         )}
         {!index && !asking && !badgeSource && <span>no market data yet</span>}
@@ -134,7 +134,7 @@ function Properties({ properties }: { properties: PropertySummary[] }) {
             </div>
             {property.purchasePrice !== null && (
               <span className="whitespace-nowrap text-body-md font-semibold text-on-surface">
-                {formatMoney(property.purchasePrice, property.purchaseCurrency)}
+                <Money value={property.purchasePrice} currency={property.purchaseCurrency} />
               </span>
             )}
           </li>

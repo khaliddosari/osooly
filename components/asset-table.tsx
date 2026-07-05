@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Icon } from "@/components/icon";
+import { Money } from "@/components/money";
 import {
   ASSET_CLASSES,
   ASSET_CLASS_META,
@@ -9,7 +10,6 @@ import {
   type AssetInput,
   type AssetView,
 } from "@/lib/assets/schema";
-import { formatMoney } from "@/lib/format";
 import type { AssetClass } from "@/lib/market-snapshot";
 import { cn } from "@/lib/utils";
 
@@ -392,9 +392,11 @@ function AssetRow({
 
       <div className="hidden shrink-0 text-right sm:block">
         <p className="text-body-md font-semibold text-on-surface">
-          {asset.purchasePrice != null
-            ? formatMoney(asset.purchasePrice, asset.purchaseCurrency)
-            : "not set"}
+          {asset.purchasePrice != null ? (
+            <Money value={asset.purchasePrice} currency={asset.purchaseCurrency} />
+          ) : (
+            "not set"
+          )}
         </p>
         <p className="text-label-sm text-on-surface-variant">
           {asset.purchasedAt ? `bought ${asset.purchasedAt}` : "cost basis"}

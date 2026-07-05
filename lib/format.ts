@@ -1,20 +1,15 @@
 /**
- * Display helpers shared by the v1 cards. Money renders as number + ISO code
- * ("245,000 SAR"), matching the design system's preference for codes over
- * currency symbols on the dark dashboard.
+ * Display helpers shared by the v1 cards. Currency-aware money rendering
+ * (the SAR symbol vs. plain ISO codes) lives in components/money.tsx, since
+ * it needs JSX; this just formats the numeral.
  */
 
-export function formatMoney(
-  value: number,
-  currency = "SAR",
-  fractionDigits?: number
-): string {
+export function formatAmount(value: number, fractionDigits?: number): string {
   const digits = fractionDigits ?? (Math.abs(value) >= 1000 ? 0 : 2);
-  const amount = value.toLocaleString("en-US", {
+  return value.toLocaleString("en-US", {
     minimumFractionDigits: digits,
     maximumFractionDigits: digits,
   });
-  return `${amount} ${currency}`;
 }
 
 export function formatSignedPercent(value: number): string {

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { Icon } from "@/components/icon";
+import { Money } from "@/components/money";
 import { auth } from "@/lib/auth";
 import { getBillingConfig, PLAN } from "@/lib/billing/provider";
 import { getDb } from "@/lib/db";
-import { formatMoney } from "@/lib/format";
 import {
   getMonthlyTokenUsage,
   MONTHLY_TOKEN_CAP,
@@ -53,7 +53,7 @@ export default async function SubscriptionPage() {
             </div>
             <p className="flex items-baseline gap-1.5">
               <span className="text-headline-lg font-bold text-on-surface">
-                {formatMoney(PLAN.price, PLAN.currency)}
+                <Money value={PLAN.price} currency={PLAN.currency} />
               </span>
               <span className="text-body-md text-on-surface-variant">
                 / {PLAN.interval}

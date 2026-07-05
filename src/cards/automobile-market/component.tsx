@@ -3,9 +3,10 @@
 import { AlertRuleForm, type AlertTarget } from "@/components/alert-rule-form";
 import { CardDataFallback, FreshnessBadge } from "@/components/card-status";
 import { Icon } from "@/components/icon";
+import { Money } from "@/components/money";
 import { RecommendationList } from "@/components/recommendation-list";
 import type { CardProps } from "@/lib/cards/types";
-import { asNumber, formatMoney, formatSignedPercent } from "@/lib/format";
+import { asNumber, formatSignedPercent } from "@/lib/format";
 import { usableReading, type SnapshotReading } from "@/lib/market-snapshot";
 import { cn } from "@/lib/utils";
 import type { AutoMarketData, VehicleValuation } from "./fetcher";
@@ -89,11 +90,11 @@ function VehicleRow({ vehicle }: { vehicle: VehicleValuation }) {
         <span className="truncate text-body-md text-on-surface">{title}</span>
         {vehicle.estimateSar !== null ? (
           <span className="whitespace-nowrap text-body-md font-semibold text-on-surface">
-            {formatMoney(vehicle.estimateSar)}
+            <Money value={vehicle.estimateSar} />
           </span>
         ) : vehicle.purchasePrice !== null ? (
           <span className="whitespace-nowrap text-body-md font-semibold text-on-surface">
-            {formatMoney(vehicle.purchasePrice, vehicle.purchaseCurrency)}
+            <Money value={vehicle.purchasePrice} currency={vehicle.purchaseCurrency} />
           </span>
         ) : (
           <span className="whitespace-nowrap text-label-sm text-on-surface-variant">
@@ -146,7 +147,7 @@ function SourceQuote({
 
   return (
     <span className="flex items-center gap-1.5 text-label-sm text-on-surface-variant">
-      {label} {formatMoney(priced.price)}
+      {label} <Money value={priced.price} />
       {samples !== null && ` · ${samples} listings`}
       <FreshnessBadge reading={priced} />
     </span>
