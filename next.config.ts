@@ -1,11 +1,17 @@
 import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
-// Expose the wrangler.toml bindings (D1, .dev.vars secrets) to `next dev`
-// through getCloudflareContext(). No-op outside dev.
-initOpenNextCloudflareForDev();
-
 const isDev = process.env.NODE_ENV === "development";
+
+// Expose the wrangler.toml bindings (D1, .dev.vars secrets) to `next dev`
+// through getCloudflareContext(). Gated to dev only: since the AI/Vectorize
+// bindings need a remote proxy session (no local simulator exists for them),
+// calling this during `next build` tries to reach Cloudflare too - harmless
+// locally where wrangler is already logged in, but a hard failure in CI
+// (and in any other non-interactive build environment) with no credentials.
+if (isDev) {
+  initOpenNextCloudflareForDev();
+}
 
 /**
  * Content-Security-Policy tuned to what the app actually loads:
