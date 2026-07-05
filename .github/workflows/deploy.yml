@@ -20,6 +20,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # Node 22 still bundles npm 10.x; the committed lockfile was generated
+      # with npm 11, and npm ci rejects lockfiles from a newer npm than its
+      # own. Pin to match so ci doesn't drift from local installs.
+      - run: npm install -g npm@11
       - run: npm ci
       - run: npm test
       # Apply any new migrations to the production D1 before shipping code
